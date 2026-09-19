@@ -1,11 +1,11 @@
-"""Generate natural Urdu narration with Microsoft Edge Neural TTS."""
+"""Generate English-first narration for the independent AI & IT Future Tech channel."""
 import asyncio
 import os
 from pathlib import Path
 import edge_tts
 
-VOICE = os.getenv("TTS_VOICE", "ur-PK-AsadNeural")
-RATE = os.getenv("TTS_RATE", "-10%")
+VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural")
+RATE = os.getenv("TTS_RATE", "-5%")
 PITCH = os.getenv("TTS_PITCH", "+0Hz")
 VOLUME = os.getenv("TTS_VOLUME", "+0%")
 
@@ -21,4 +21,7 @@ def synthesize(text: str, output_path: str, voice: str = VOICE) -> None:
     asyncio.run(generate_voice(text, output_path, voice))
 
 if __name__ == "__main__":
-    synthesize("السلام علیکم ورحمۃ اللہ وبرکاتہ۔ آج کی مختصر یاددہانی پیش خدمت ہے۔", "output/voice-test.mp3")
+    synthesize(
+        "Welcome to AI and IT Future Tech. Today we are exploring how AI agents are changing software workflows.",
+        "output/voice-test.mp3",
+    )
