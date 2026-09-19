@@ -1,0 +1,41 @@
+channel:
+  brand_name: "AI & IT Future Tech"
+  brand_short_name: "AI Future Tech"
+  language: "en"
+  content_focus:
+    - "Artificial Intelligence"
+    - "IT and software"
+    - "Future technology"
+    - "Recent technology news and developments"
+    - "Practical technology explainers"
+  format: "faceless"
+  source_language: "en"
+  translation_mode: "multi-language"
+  public_publishing: false
+
+brand:
+  identity: "independent"
+  tagline: "AI, IT & the Future of Technology"
+  visual_direction:
+    - "clean"
+    - "modern"
+    - "futuristic"
+    - "technology-first"
+  forbidden_dependencies:
+    - "HidayatTube branding"
+    - "HidayatTube logos"
+    - "HidayatTube channel identity"
+    - "HidayatTube content"
+
+localization:
+  source_locale: "en"
+  strategy: "generate English master, then translate the approved script/package"
+  supported_mode: "all provider-supported locales"
+  locale_files: "locales/<locale>.yml"
+  preserve:
+    - "brand_name"
+    - "product_names"
+    - "company_names"
+    - "URLs"
+    - "technical identifiers"
+  human_review_required: true
