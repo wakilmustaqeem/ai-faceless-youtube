@@ -22,4 +22,4 @@ jobs:
       - name: Compile core pipeline and tests
         run: python -m compileall -q core pipeline tests
       - name: Run research contract tests
-        run: pytest -q tests/test_research_engine.py tests/test_flags.py
+        run: PYTHONPATH=. pytest -q tests/test_research_engine.py tests/test_flags.py
