@@ -1,0 +1,6 @@
+name: science-facts
+audience: general
+tone: evidence-based
+research_sources_required: true
+originality_threshold: 0.8
+visual_style: documentary

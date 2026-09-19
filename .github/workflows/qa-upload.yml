@@ -1,0 +1,23 @@
+name: QA and Private Upload Gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/validate-config.py
+      - run: python -m py_compile agents/*.py governance/*.py
+      - run: echo "QA passed structurally; public publishing remains disabled."
+
+  publish-gate:
+    needs: qa
+    if: ${{ needs.qa.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "HUMAN REVIEW REQUIRED - no automatic public publish."

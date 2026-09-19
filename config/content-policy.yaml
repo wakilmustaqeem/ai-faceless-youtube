@@ -1,0 +1,23 @@
+version: 1
+publishing: disabled_by_default
+
+rules:
+  no_secrets_in_content: true
+  no_unverified_factual_claims: true
+  no_copyright_infringing_assets: true
+  no_reused_scripts_without_originality_check: true
+  no_automatic_public_publish: true
+  human_review_required: true
+
+allowed_content:
+  - educational
+  - explanatory
+  - documentary_style
+  - science_facts
+  - technology_explainers
+  - finance_education
+
+review:
+  require_source_notes: true
+  require_originality_gate: true
+  require_human_approval: true

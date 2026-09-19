@@ -1,0 +1,43 @@
+project:
+  name: ai-faceless-youtube
+  mode: independent
+  publishing: false
+  human_review_required: true
+
+pipeline:
+  - research
+  - script
+  - voice
+  - visuals
+  - edit
+  - qa
+  - private_upload
+  - human_review
+  - publish_or_reject
+
+providers:
+  llm:
+    preferred: gemini
+    fallback: ollama
+    client_side_secrets: false
+  tts:
+    preferred: edge-tts
+    fallback: piper
+  media:
+    stock: [pexels, pixabay, unsplash]
+    image_generation: pollinations
+  editing:
+    preferred: ffmpeg
+    optional: moviepy
+
+gates:
+  originality: required
+  content_policy: required
+  qa: required
+  human_review: required
+  publish_approval: required
+
+credentials:
+  youtube_channel: independent
+  storage: independent
+  provider_keys: environment_only
