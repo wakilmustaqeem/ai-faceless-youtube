@@ -6,10 +6,11 @@ Input JSON:
 Output preserves protected terms and writes one locale JSON per requested target.
 """
 from __future__ import annotations
-import argparse, json, re
+import argparse, json
 from pathlib import Path
 
 LOCALES = ("ur", "ar", "hi", "es", "fr")
+
 
 def _load_argos():
     try:
@@ -18,6 +19,7 @@ def _load_argos():
     except ImportError as exc:
         raise RuntimeError("Argos Translate is not installed") from exc
     return argostranslate.package, argostranslate.translate
+
 
 def ensure_language_pair(from_code: str, to_code: str, auto_install: bool) -> None:
     package, translate = _load_argos()
@@ -35,30 +37,44 @@ def ensure_language_pair(from_code: str, to_code: str, auto_install: bool) -> No
         raise RuntimeError(f"No Argos package available for {from_code}->{to_code}")
     package.install_from_path(candidates[0].download())
 
-def _protect(text: str, terms: list[str]) -> tuple[str, dict[str, str]]:
-    replacements = {}
-    protected = text
-    for i, term in enumerate(sorted(set(t for t in terms if t), key=len, reverse=True)):
-        token = f"__PROTECTED_{i}__"
-        protected = protected.replace(term, token)
-        replacements[token] = term
-    return protected, replacements
 
-def _restore(text: str, replacements: dict[str, str]) -> str:
-    for token, term in replacements.items():
-        text = text.replace(token, term)
-    return text
+def _translate_with_protected_terms(text: str, translation, protected_terms: list[str]) -> str:
+    """Translate segments while never sending protected terms to Argos."""
+    terms = sorted(set(term for term in protected_terms if term), key=len, reverse=True)
+    if not terms:
+        return translation.translate(text)
+
+    parts: list[str] = []
+    cursor = 0
+    while cursor < len(text):
+        matches = [
+            (text.find(term, cursor), term)
+            for term in terms
+            if text.find(term, cursor) >= 0
+        ]
+        if not matches:
+            parts.append(translation.translate(text[cursor:]))
+            break
+
+        start, term = min(matches, key=lambda item: item[0])
+        if start > cursor:
+            parts.append(translation.translate(text[cursor:start]))
+        parts.append(term)
+        cursor = start + len(term)
+
+    return "".join(parts)
+
 
 def translate_text(text: str, from_code: str, to_code: str, protected_terms: list[str]) -> str:
-    package, translate = _load_argos()
-    protected_text, replacements = _protect(text, protected_terms)
+    _, translate = _load_argos()
     installed = translate.get_installed_languages()
     source = next((x for x in installed if x.code == from_code), None)
     target = next((x for x in installed if x.code == to_code), None)
     if not source or not target:
         raise RuntimeError(f"Argos languages not installed: {from_code}, {to_code}")
     translation = source.get_translation(target)
-    return _restore(translation.translate(protected_text), replacements)
+    return _translate_with_protected_terms(text, translation, protected_terms)
+
 
 def translate_package(data: dict, locale: str, auto_install: bool = False) -> dict:
     if locale not in LOCALES:
@@ -74,6 +90,7 @@ def translate_package(data: dict, locale: str, auto_install: bool = False) -> di
         "protected_terms": protected,
     }
 
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True)
@@ -82,13 +99,16 @@ def main() -> None:
     parser.add_argument("--auto-install", action="store_true")
     args = parser.parse_args()
     data = json.loads(Path(args.input).read_text(encoding="utf-8"))
-    out = Path(args.output); out.mkdir(parents=True, exist_ok=True)
+    out = Path(args.output)
+    out.mkdir(parents=True, exist_ok=True)
     for locale in args.locales:
         result = translate_package(data, locale, args.auto_install)
         (out / f"{locale}.json").write_text(
-            json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
         )
         print(f"Translated English master -> {locale}: {out / f'{locale}.json'}")
+
 
 if __name__ == "__main__":
     main()
