@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main, copy/hidayattube-production-engine]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
