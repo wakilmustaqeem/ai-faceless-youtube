@@ -1,4 +1,4 @@
-PyYAML>=6.0,<7
+PyYAML>=6.0.3,<7
 Pillow>=11.0.0,<12
 playwright>=1.55.0,<2
 edge-tts>=6.1.0,<8
