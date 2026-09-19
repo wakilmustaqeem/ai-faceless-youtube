@@ -11,7 +11,7 @@ MIN_SOURCES=3; MIN_CREDIBLE=2
 def _entities(sources):
     words=[]
     for s in sources:
-        for token in re.findall(r"\b[A-Z][A-Za-z0-9&.-]{2,}\\b",s.text or s.title):
+        for token in re.findall(r"\b[A-Z][A-Za-z0-9&.-]{2,}\b",s.text or s.title):
             if token not in words: words.append(token)
     return words[:20]
 
