@@ -1,10 +1,24 @@
 """Research stage: produces a source-backed research package."""
 
-def run(topic: str) -> dict:
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+from core.research.engine import run_research
+
+
+def run(topic: str, run_id: str = "research-cli") -> dict:
     if not topic.strip():
         raise ValueError("topic is required")
-    return {"stage": "research", "topic": topic, "sources": [], "status": "needs_sources"}
+    bundle = run_research(run_id=run_id, topic=topic)
+    return bundle.model_dump(mode="json")
+
 
 if __name__ == "__main__":
-    import sys
-    print(run(" ".join(sys.argv[1:]) or "demo-topic"))
+    topic = " ".join(sys.argv[1:]).strip() or "demo-topic"
+    result = run(topic)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    if any(w.startswith("only_") or w == "no_claims_extracted" for w in result["warnings"]):
+        raise SystemExit(1)
