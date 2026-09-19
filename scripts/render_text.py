@@ -1,4 +1,4 @@
-"""Render Urdu RTL/Nastaliq overlays through Chromium."""
+"""Render English overlays through Chromium."""
 from pathlib import Path
 from html import escape
 import asyncio
@@ -24,11 +24,10 @@ async def _render_template(template_path: Path, replacements: dict[str, str], ou
         await page.goto(temp_html.as_uri(), wait_until="load")
         await page.evaluate("document.fonts.ready")
         await page.wait_for_timeout(300)
-        if not await page.evaluate("document.fonts.check('52px \"Noto Nastaliq Urdu\"')"):
-            raise RuntimeError("Noto Nastaliq Urdu did not load in Chromium")
+        if not await page.evaluate("document.fonts.check('52px Arial')"):
+            raise RuntimeError("English overlay font did not load in Chromium")
         await page.screenshot(path=str(out), omit_background=True, full_page=False)
         await browser.close()
-    temp_html.unlink(missing_ok=True)
 
 async def render(title: str, body: str, footer: str, output_png: str) -> None:
     await _render_template(TEMPLATE, {"__TITLE__":title,"__BODY__":body,"__FOOTER__":footer}, output_png)
