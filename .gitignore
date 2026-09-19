@@ -1,0 +1,11 @@
+# Secrets / runtime data
+.env
+.env.*
+!.env.example
+credentials/
+secrets/
+output/
+artifacts/
+logs/*.jsonl
+__pycache__/
+*.pyc
