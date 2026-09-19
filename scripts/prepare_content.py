@@ -1,4 +1,4 @@
-"""Build an independent cinematic Urdu YouTube Short with automatic motion and validation."""
+"""Build an independent English AI & IT Future Tech review video."""
 from pathlib import Path
 from datetime import datetime, timezone
 import os, subprocess
@@ -8,18 +8,23 @@ from scripts.generate_voice import synthesize
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
 SCENE_SECONDS=7.5; XFADE_SECONDS=0.55; DURATION=30
-TOPIC="روزانہ مختصر اسلامی یاددہانی"
+BRAND="AI & IT Future Tech"
+TOPIC="How AI Agents Are Changing Software Workflows"
 SCENES=[
-"السلام علیکم ورحمۃ اللہ وبرکاتہ۔\nآج کی مختصر یاددہانی۔",
-"نماز اللہ سے تعلق مضبوط کرنے کا ذریعہ ہے۔\nاپنی نماز کی حفاظت کریں۔",
-"دل کا سکون اللہ کی یاد میں ہے۔\nروزانہ اپنے رب کو یاد کریں۔",
-"آئیے نیکی کے سفر کو جاری رکھیں۔\nLike • Share • Subscribe",
+    "AI agents can now handle multi-step software tasks.\nBut what actually changes for developers?",
+    "Agents can research, draft code, run checks, and iterate.\nThe workflow becomes more automated, not fully autonomous.",
+    "The key is verification: tests, review gates, and human approval still matter.\nAutomation should stop when evidence is missing.",
+    "AI & IT Future Tech\nAI, IT & the Future of Technology",
 ]
-VOICE_TEXT="السلام علیکم ورحمۃ اللہ وبرکاتہ۔ آج کی مختصر یاددہانی پیش خدمت ہے۔ نماز اللہ سے تعلق مضبوط کرنے کا ذریعہ ہے۔ اپنی نماز کی حفاظت کریں۔ دل کا سکون اللہ کی یاد میں ہے۔ روزانہ اپنے رب کو یاد کریں۔ آئیے نیکی کے سفر کو جاری رکھیں۔"
-SCRIPT=f"# {TOPIC}\n\n{VOICE_TEXT}\n\nنوٹ: قرآن و حدیث کے اصل حوالہ جات اشاعت سے پہلے مستند ذریعے سے انسانی طور پر verify کیے جائیں۔\n"
-metadata=(f"topic: {TOPIC}\ncreated_utc: {datetime.now(timezone.utc).isoformat()}\n"
-f"duration_target_seconds: {DURATION}\nformat: YouTube Shorts 9:16\nresolution: {W}x{H}\nframe_rate: {FPS}\n"
-f"voice: Microsoft Edge Neural Urdu ({os.getenv('TTS_VOICE','ur-PK-AsadNeural')})\nvideo_codec: H.264\naudio_codec: AAC-LC\nstatus: REVIEW_REQUIRED\n")
+VOICE_TEXT=("Welcome to AI and IT Future Tech. Today we are exploring how AI agents are changing software workflows. "
+"AI agents can handle multi-step tasks such as research, drafting code, running checks, and iterating. "
+"The important change is workflow automation, not removing every human decision. "
+"Verification still matters: tests, review gates, and human approval should stop the pipeline when evidence is missing. "
+"This is AI and IT Future Tech, bringing practical explainers on AI, IT, and the future of technology.")
+SCRIPT=f"# {TOPIC}\n\n{VOICE_TEXT}\n\nReview note: verify current product capabilities and source claims before publication.\n"
+metadata=(f"brand: {BRAND}\ntopic: {TOPIC}\ncreated_utc: {datetime.now(timezone.utc).isoformat()}\n"
+f"source_language: en\nduration_target_seconds: {DURATION}\nformat: YouTube Shorts 9:16\nresolution: {W}x{H}\nframe_rate: {FPS}\n"
+f"voice: Microsoft Edge Neural English ({os.getenv('TTS_VOICE','en-US-GuyNeural')})\nvideo_codec: H.264\naudio_codec: AAC-LC\nstatus: REVIEW_REQUIRED\n")
 (OUT/"script.md").write_text(SCRIPT,encoding="utf-8"); (OUT/"metadata.txt").write_text(metadata,encoding="utf-8")
 
 def make_background(path:Path, index:int)->None:
@@ -28,11 +33,12 @@ def make_background(path:Path, index:int)->None:
         t=y/(H-1)
         for x in range(W):
             glow=max(0,1-abs(x-W/2)/(W*.72))
-            px[x,y]=(int(10+16*t+8*glow),int(16+14*t+7*glow),int(30+22*t+10*glow))
+            px[x,y]=(int(8+8*t+5*glow),int(14+18*t+7*glow),int(28+30*t+12*glow))
     d=ImageDraw.Draw(img,"RGBA")
-    d.rectangle((28,28,W-28,H-28),outline=(190,155,70,190),width=4)
-    d.rounded_rectangle((58,430,W-58,1490),radius=52,fill=(5,8,16,126),outline=(190,155,70,205),width=3)
-    d.rounded_rectangle((98,468,W-98,510),radius=18,fill=(190,155,70,220))
+    d.rectangle((28,28,W-28,H-28),outline=(110,200,255,180),width=4)
+    d.rounded_rectangle((58,430,W-58,1490),radius=52,fill=(3,8,18,150),outline=(90,180,240,180),width=3)
+    d.rounded_rectangle((98,468,W-98,510),radius=18,fill=(70,160,235,190))
+    d.text((W//2,300),BRAND,anchor="mm",fill=(220,240,255,230))
     img.save(path,format="PNG")
 
 def run_renderer(title,body,footer,out):
@@ -44,13 +50,13 @@ def run_cta_renderer(out):
 def make_motion_scene(background:Path,output:Path,direction:int)->None:
     zoom="min(zoom+0.00075,1.12)"
     x="iw/2-(iw/zoom/2)+sin(on/70)*18" if direction%2 else "iw/2-(iw/zoom/2)-sin(on/70)*18"
-    vf=f"scale=1220:2170:force_original_aspect_ratio=increase,crop=1220:2170,zoompan=z='{zoom}':x='{x}':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30,eq=contrast=1.03:saturation=0.92:brightness=-0.02,format=yuv420p"
+    vf=f"scale=1220:2170:force_original_aspect_ratio=increase,crop=1220:2170,zoompan=z='{zoom}':x='{x}':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30,eq=contrast=1.03:saturation=1.02:brightness=-0.02,format=yuv420p"
     subprocess.run(["ffmpeg","-y","-loop","1","-i",str(background),"-vf",vf,"-t",str(SCENE_SECONDS),"-r",str(FPS),"-an","-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p",str(output)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 
 scene_videos=[]
 for i,text in enumerate(SCENES,1):
     bg=OUT/f"scene_{i}_background.png"; overlay=OUT/f"scene_{i}_text.png"; motion=OUT/f"scene_{i}_motion.mp4"; scene=OUT/f"scene_{i}.mp4"
-    make_background(bg,i); run_renderer(TOPIC,text,f"INDEPENDENT • منظر {i}",overlay); make_motion_scene(bg,motion,i)
+    make_background(bg,i); run_renderer(TOPIC,text,f"{BRAND} • Scene {i}",overlay); make_motion_scene(bg,motion,i)
     subprocess.run(["ffmpeg","-y","-i",str(motion),"-loop","1","-i",str(overlay),"-filter_complex","[0:v][1:v]overlay=0:0:format=auto,format=yuv420p,setsar=1","-t",str(SCENE_SECONDS),"-r",str(FPS),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-an",str(scene)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
     motion.unlink(missing_ok=True); scene_videos.append(scene)
 
@@ -75,4 +81,4 @@ for p in scene_videos: p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_background.png"): p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_text.png"): p.unlink(missing_ok=True)
 for p in [silent,with_cta,cta]: p.unlink(missing_ok=True)
-print(f"Verified independent cinematic 1080x1920 H.264/AAC MP4 with automatic motion: {video}")
+print(f"Verified independent English 1080x1920 H.264/AAC MP4 for {BRAND}: {video}")
