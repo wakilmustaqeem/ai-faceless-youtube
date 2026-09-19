@@ -2,12 +2,12 @@ from __future__ import annotations
 import re
 from collections import Counter
 from core.contracts.research import Claim, Source
-SENT_SPLIT=re.compile(r"(?<=[.!?])\\s+")
+SENT_SPLIT=re.compile(r"(?<=[.!?])\s+")
 
 def _sentences_for(source: Source):
     return [s.strip() for s in SENT_SPLIT.split(source.text or "") if len(s.strip())>=40]
 
-def _tokens(text): return set(re.findall(r"[\\w-]{4,}",text.lower()))
+def _tokens(text): return set(re.findall(r"[\w-]{4,}",text.lower()))
 
 def extract_claims(topic: str, sources: list[Source])->list[Claim]:
     claims=[]
