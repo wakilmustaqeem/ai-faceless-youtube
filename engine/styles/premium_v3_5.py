@@ -6,17 +6,27 @@ from engine.styles.premium_v2 import W,H,WHITE,CYAN,MUTED,GREEN,PANEL,_font,text
 
 def desk(im,t):
     d=ImageDraw.Draw(im)
-    # layered desk / monitor silhouettes create depth instead of a flat card
-    d.rounded_rectangle((120,170,1800,910),radius=38,fill=(7,13,22,210),outline=(70,110,125,120),width=2)
-    d.rectangle((220,250,1690,760),fill=(4,9,16,235))
-    d.polygon([(0,1080),(1920,1080),(1690,760),(230,760)],fill=(9,17,27,255))
-    for x in range(260,1680,140):
-        d.line((x,780,x-80,1080),fill=(40,65,78,80),width=2)
-    glow_line(im,[(300,730),(850,730),(1100,650),(1600,650)],width=2)
-    p=min(1.0,t/1.2)
-    text_fit(d,(170+int((1-p)*100),365),"SHIPPING FASTER",1100,100,False,WHITE)
-    text_fit(d,(170+int((1-p)*100),480),"IS BROKEN?",900,100,True,CYAN)
-    text_fit(d,(175,650),"THE AGENTIC LOOP CHANGES THE WORKFLOW",1100,30,True,MUTED)
+    # Full-frame cinematic cold open: no boxed-monitor feel; the story fills the 16:9 canvas.
+    p=min(1.0,t/1.6)
+    ease=1-(1-p)**3
+    # Deep layered environment
+    d.rectangle((0,0,W,H),fill=(3,8,15,255))
+    for y in range(0,H,90):
+        d.line((0,y,W,y),fill=(18,35,48,45),width=1)
+    # Moving perspective beams create depth across the full height.
+    for i in range(8):
+        x0=-300+i*300+int(220*ease)
+        d.polygon([(x0,1080),(x0+130,1080),(x0+620,0),(x0+500,0)],fill=(8,28,40,80))
+    glow_line(im,[(70,830),(610,830),(980,610),(1840,610)],width=4)
+    # Large cinematic title, staged as a true cold-open rather than a small UI card.
+    x=int(120+(1-ease)*180)
+    text_fit(d,(x,300),"SHIPPING FASTER",1580,125,False,WHITE)
+    text_fit(d,(x,445),"IS BROKEN?",1500,145,True,CYAN)
+    text_fit(d,(x,650),"THE AGENTIC LOOP CHANGES THE WORKFLOW",1450,34,True,MUTED)
+    # Kinetic accent / time pressure cue
+    d.rounded_rectangle((120,785,520,820),radius=12,fill=(10,35,48,220))
+    d.rounded_rectangle((120,785,120+int(400*ease),820),radius=12,fill=CYAN)
+    d.text((550,780),"INTENT  →  PLAN  →  TOOLS  →  CODE  →  TEST",font=_font(24,True),fill=WHITE)
 
 def shift(im,t):
     d=ImageDraw.Draw(im)
