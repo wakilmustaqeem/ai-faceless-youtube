@@ -38,26 +38,28 @@ def ease(t: float) -> float:
 
 
 def cinematic_background(t: float, seed: int = 7) -> Image.Image:
+    # Keep the background expressive but cheap enough for a CI render.
     im=Image.new("RGBA",(W,H),(5,10,17,255))
-    px=im.load()
-    for y in range(H):
-        for x in range(W):
-            dx=(x-W*.55)/W; dy=(y-H*.45)/H
-            glow=max(0.0,1-math.sqrt(dx*dx+dy*dy)*2.0)
-            sweep=.5+.5*math.sin(t*.45+x*.002+y*.0015+seed)
-            px[x,y]=(4+int(7*glow),9+int(12*glow),16+int(22*glow+8*sweep),255)
-    # Moving atmospheric light
     haze=Image.new("RGBA",(W,H),(0,0,0,0)); d=ImageDraw.Draw(haze)
-    cx=W*(.18+.06*math.sin(t*.18)); cy=H*(.38+.08*math.cos(t*.22))
-    r=360
-    d.ellipse((cx-r,cy-r,cx+r,cy+r),fill=(0,217,255,28))
-    haze=haze.filter(ImageFilter.GaussianBlur(90)); im=Image.alpha_composite(im,haze)
-    # Depth particles
-    p=Image.new("RGBA",(W,H),(0,0,0,0)); d=ImageDraw.Draw(p)
-    for i in range(90):
-        x=(i*137 + int(t*18*(i%5+1)))%W; y=(i*71 + int(t*11*(i%7+1)))%H
+    cx=W*(.20+.08*math.sin(t*.18+seed)); cy=H*(.36+.10*math.cos(t*.22))
+    d.ellipse((cx-420,cy-420,cx+420,cy+420),fill=(0,217,255,38))
+    cx2=W*(.78+.06*math.cos(t*.15)); cy2=H*(.68+.08*math.sin(t*.19))
+    d.ellipse((cx2-300,cy2-300,cx2+300,cy2+300),fill=(55,90,255,20))
+    haze=haze.filter(ImageFilter.GaussianBlur(95))
+    im=Image.alpha_composite(im,haze)
+    # Soft diagonal light bands create camera/sweep depth without a flat card.
+    sweep=Image.new("RGBA",(W,H),(0,0,0,0)); sd=ImageDraw.Draw(sweep)
+    offset=int((t*90)%500)-250
+    sd.polygon([(offset,0),(offset+240,0),(offset+1050,H),(offset+810,H)],fill=(0,217,255,8))
+    sweep=sweep.filter(ImageFilter.GaussianBlur(24))
+    im=Image.alpha_composite(im,sweep)
+    # Depth particles.
+    p=Image.new("RGBA",(W,H),(0,0,0,0)); pd=ImageDraw.Draw(p)
+    for i in range(70):
+        x=(i*137 + int(t*18*(i%5+1)))%W
+        y=(i*71 + int(t*11*(i%7+1)))%H
         a=18+(i%5)*7; r=1+(i%3)
-        d.ellipse((x-r,y-r,x+r,y+r),fill=(150,210,225,a))
+        pd.ellipse((x-r,y-r,x+r,y+r),fill=(150,210,225,a))
     return Image.alpha_composite(im,p)
 
 
