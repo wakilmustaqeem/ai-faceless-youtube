@@ -1,0 +1,11 @@
+sources:
+  - id: anthropic-2026-state-ai-agents
+    title: "The 2026 State of AI Agents Report"
+    publisher: "Anthropic"
+    url: "https://resources.anthropic.com/hubfs/The%202026%20State%20of%20AI%20Agents%20Report.pdf"
+    claim: "Organizations reported time gains across planning, code generation, research/documentation, and code review/testing."
+    figures:
+      planning_and_ideation: 58
+      code_generation: 59
+      research_and_documentation: 59
+      code_review_and_testing: 59

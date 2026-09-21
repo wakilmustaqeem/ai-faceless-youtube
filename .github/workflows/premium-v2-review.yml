@@ -1,0 +1,41 @@
+name: Premium Tech Style v2 Private Review
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "engine/**"
+      - "scripts/render_premium_v2.py"
+      - ".github/workflows/premium-v2-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  render-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core
+          fc-cache -f
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Render private Test Video #1 v2
+        run: PYTHONPATH=. python scripts/render_premium_v2.py
+      - name: Verify review artifact
+        run: |
+          test -s output/review/test1_v2.mp4
+          ffprobe -v error -show_entries format=duration:stream=width,height,r_frame_rate -of default=noprint_wrappers=1 output/review/test1_v2.mp4
+      - name: Upload private review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test1-v2-private-review
+          path: output/review/test1_v2.mp4
+      - name: Publish gate
+        run: |
+          echo "PUBLIC YOUTUBE PUBLISHING: OFF"
+          echo "Human visual approval is required before any publication."

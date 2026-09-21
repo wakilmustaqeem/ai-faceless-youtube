@@ -1,0 +1,5 @@
+# Production safety lock
+publish_enabled: false
+public_youtube_publish: false
+human_qa_required: true
+ai_disclosure_review_required: true
