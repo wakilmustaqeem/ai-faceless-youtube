@@ -8,6 +8,7 @@ from scripts.generate_voice import synthesize
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
 SCENE_SECONDS=7.5; XFADE_SECONDS=0.55; DURATION=30
+DURATION_TOLERANCE=0.10
 BRAND="AI & IT Future Tech"
 TOPIC="How AI Agents Are Changing Software Workflows"
 SCENES=[
@@ -23,7 +24,7 @@ VOICE_TEXT=("Welcome to AI and IT Future Tech. Today we are exploring how AI age
 "This is AI and IT Future Tech, bringing practical explainers on AI, IT, and the future of technology.")
 SCRIPT=f"# {TOPIC}\n\n{VOICE_TEXT}\n\nReview note: verify current product capabilities and source claims before publication.\n"
 metadata=(f"brand: {BRAND}\ntopic: {TOPIC}\ncreated_utc: {datetime.now(timezone.utc).isoformat()}\n"
-f"source_language: en\nduration_target_seconds: {DURATION}\nformat: YouTube Shorts 9:16\nresolution: {W}x{H}\nframe_rate: {FPS}\n"
+f"source_language: en\nduration_target_seconds: {DURATION}\nduration_tolerance_seconds: {DURATION_TOLERANCE}\nformat: YouTube Shorts 9:16\nresolution: {W}x{H}\nframe_rate: {FPS}\n"
 f"voice: Microsoft Edge Neural English ({os.getenv('TTS_VOICE','en-US-GuyNeural')})\nvideo_codec: H.264\naudio_codec: AAC-LC\nstatus: REVIEW_REQUIRED\n")
 (OUT/"script.md").write_text(SCRIPT,encoding="utf-8"); (OUT/"metadata.txt").write_text(metadata,encoding="utf-8")
 
@@ -76,9 +77,12 @@ probe=subprocess.run(["ffprobe","-v","error","-show_entries","format=format_name
 required=["codec_type=video","codec_name=h264","pix_fmt=yuv420p","codec_type=audio","codec_name=aac",f"width={W}",f"height={H}"]
 if any(x not in probe.stdout for x in required): raise SystemExit("Generated MP4 failed stream/resolution checks")
 if "format_name=mov,mp4,m4a,3gp,3g2,mj2" not in probe.stdout: raise SystemExit("Generated file is not a standard MP4 container")
+duration_line=next((line for line in probe.stdout.splitlines() if line.startswith("duration=")), "")
+actual_duration=float(duration_line.split("=",1)[1]) if duration_line else -1.0
+if abs(actual_duration-DURATION) > DURATION_TOLERANCE: raise SystemExit(f"Generated MP4 duration {actual_duration:.3f}s is outside {DURATION}±{DURATION_TOLERANCE}s")
 subprocess.run(["ffmpeg","-v","error","-i",str(video),"-f","null","-"],check=True)
 for p in scene_videos: p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_background.png"): p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_text.png"): p.unlink(missing_ok=True)
 for p in [silent,with_cta,cta]: p.unlink(missing_ok=True)
-print(f"Verified independent English 1080x1920 H.264/AAC MP4 for {BRAND}: {video}")
+print(f"Verified independent English 1080x1920 H.264/AAC MP4 for {BRAND}: {video} ({actual_duration:.3f}s)")
