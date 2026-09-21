@@ -1,41 +1,26 @@
-"""Script stage: converts approved, source-backed research into an original draft."""
+"""Script stage: converts verified, source-backed research into a draft."""
 
 from __future__ import annotations
 
+from governance.claim_evidence import verify_claims
 
 def run(research: dict) -> dict:
     if research.get("status") != "approved":
-        return {
-            "stage": "script",
-            "status": "blocked",
-            "reason": "research_not_approved",
-        }
-
+        return {"stage": "script", "status": "blocked", "reason": "research_not_approved"}
     topic = str(research.get("topic", "")).strip()
     sources = research.get("sources") or []
+    claims = research.get("claims") or []
     if not topic or not sources:
-        return {
-            "stage": "script",
-            "status": "blocked",
-            "reason": "missing_topic_or_sources",
-        }
-
-    evidence = "\n".join(
-        f"- {item['title']}: {item['summary']} ({item['url']})"
-        for item in sources
-    )
+        return {"stage": "script", "status": "blocked", "reason": "missing_topic_or_sources"}
+    evidence_result = verify_claims(claims)
+    if not evidence_result["passed"]:
+        return {"stage": "script", "status": "blocked", "reason": "claim_evidence_not_verified", "claims": evidence_result["claims"]}
+    evidence = "\n".join(f"- {item["source_title"]}: {item["evidence"]} ({item["source_url"]})" for item in evidence_result["claims"])
     script = (
         f"{topic}\n\n"
-        "What the evidence shows\n"
+        "What the verified evidence shows\n"
         f"{evidence}\n\n"
         "Originality note\n"
-        "This draft is based on the listed evidence and must add original "
-        "explanation, context, and synthesis before publication. "
-        "Do not present source wording as original reporting.\n"
+        "This draft uses verified evidence but requires original explanation, context, and synthesis before publication. Do not present source wording as original reporting.\n"
     )
-    return {
-        "stage": "script",
-        "status": "draft",
-        "script": script,
-        "sources": sources,
-    }
+    return {"stage": "script", "status": "draft", "script": script, "sources": sources, "claims": evidence_result["claims"]}
