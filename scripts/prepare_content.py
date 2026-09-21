@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import os, subprocess
 from PIL import Image, ImageDraw
 from scripts.generate_voice import synthesize
+from governance.voice_quality_gate import check_voice
 
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
@@ -71,7 +72,10 @@ silent=OUT/"silent.mp4"
 subprocess.run(["ffmpeg","-y",*inputs,"-filter_complex",";".join(filters),"-map",f"[{current}]","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-preset","medium","-movflags","+faststart",str(silent)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 cta=OUT/"subscribe_cta.png"; run_cta_renderer(cta); start=(len(SCENES)-1)*(SCENE_SECONDS-XFADE_SECONDS); with_cta=OUT/"silent_with_cta.mp4"
 subprocess.run(["ffmpeg","-y","-i",str(silent),"-loop","1","-i",str(cta),"-filter_complex",f"[0:v][1:v]overlay=0:0:format=auto:enable='between(t,{start:.2f},{DURATION})'[v]","-map","[v]","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-preset","medium","-movflags","+faststart",str(with_cta)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-voice=OUT/"voice.mp3"; synthesize(VOICE_TEXT,str(voice)); video=OUT/"video.mp4"
+voice=OUT/"voice.mp3"; synthesize(VOICE_TEXT,str(voice))
+voice_qa=check_voice(str(voice))
+if not voice_qa["passed"]: raise SystemExit(f"Voice QA blocked: {voice_qa}")
+video=OUT/"video.mp4"
 subprocess.run(["ffmpeg","-y","-i",str(with_cta),"-i",str(voice),"-map","0:v:0","-map","1:a:0","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-c:a","aac","-profile:a","aac_low","-ar","44100","-ac","2","-b:a","128k","-af",f"apad=pad_dur={DURATION}","-movflags","+faststart",str(video)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 probe=subprocess.run(["ffprobe","-v","error","-show_entries","format=format_name,duration:stream=index,codec_type,codec_name,pix_fmt,width,height","-of","default=noprint_wrappers=1",str(video)],check=True,capture_output=True,text=True)
 required=["codec_type=video","codec_name=h264","pix_fmt=yuv420p","codec_type=audio","codec_name=aac",f"width={W}",f"height={H}"]
