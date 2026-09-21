@@ -4,12 +4,15 @@ from pathlib import Path
 OUT = Path("output")
 SCRIPT = OUT / "script.md"
 METADATA = OUT / "metadata.txt"
+CAPTIONS = OUT / "captions.srt"
 errors = []
 
 if not SCRIPT.exists():
     errors.append("Missing output/script.md")
 if not METADATA.exists():
     errors.append("Missing output/metadata.txt")
+if not CAPTIONS.exists():
+    errors.append("Missing output/captions.srt")
 
 if SCRIPT.exists():
     text = SCRIPT.read_text(encoding="utf-8").strip()
