@@ -40,10 +40,17 @@ def make_background(path:Path, index:int)->None:
             glow=max(0,1-abs(x-W/2)/(W*.72))
             px[x,y]=(int(8+8*t+5*glow),int(14+18*t+7*glow),int(28+30*t+12*glow))
     d=ImageDraw.Draw(img,"RGBA")
-    d.rectangle((28,28,W-28,H-28),outline=(110,200,255,180),width=4)
-    d.rounded_rectangle((58,430,W-58,1490),radius=52,fill=(3,8,18,150),outline=(90,180,240,180),width=3)
-    d.rounded_rectangle((98,468,W-98,510),radius=18,fill=(70,160,235,190))
-    d.text((W//2,300),BRAND,anchor="mm",fill=(220,240,255,230))
+    # Premium v3: presenter-safe cinematic studio composition with LCD/HUD framing.
+    d.rectangle((24,24,W-24,H-24),outline=(110,200,255,180),width=3)
+    d.rounded_rectangle((74,260,W-74,1680),radius=54,fill=(3,8,18,125),outline=(90,180,240,150),width=3)
+    d.rounded_rectangle((108,330,W-108,1180),radius=42,fill=(5,12,24,105),outline=(130,210,255,135),width=2)
+    d.rounded_rectangle((130,360,W-130,395),radius=16,fill=(70,160,235,160))
+    # Clear presenter zone: avoid placing text over face/body.
+    d.rounded_rectangle((320,500,760,1560),radius=90,outline=(130,210,255,70),width=2)
+    for yy in (430, 1610):
+        d.line((112,yy,968,yy),fill=(110,200,255,90),width=2)
+    d.text((W//2,185),BRAND,anchor="mm",fill=(220,240,255,235))
+    d.text((W//2,215),"PREMIUM TECH • V3",anchor="mm",fill=(140,205,240,180))
     img.save(path,format="PNG")
 
 def run_renderer(title,body,footer,out):
