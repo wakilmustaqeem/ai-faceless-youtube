@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import os, subprocess
 from PIL import Image, ImageDraw
 from scripts.generate_voice import synthesize
+from scripts.generate_presenter_asset import main as generate_presenter_asset
 from governance.voice_quality_gate import check_voice
 from governance.visual_quality_gate import check_video
 from governance.captions_quality_gate import check_captions
@@ -32,26 +33,26 @@ f"source_language: en\nduration_target_seconds: {DURATION}\nduration_tolerance_s
 f"voice: Microsoft Edge Neural English ({os.getenv('TTS_VOICE','en-US-GuyNeural')})\nvideo_codec: H.264\naudio_codec: AAC-LC\nstatus: REVIEW_REQUIRED\n")
 (OUT/"script.md").write_text(SCRIPT,encoding="utf-8"); (OUT/"metadata.txt").write_text(metadata,encoding="utf-8")
 
-def make_background(path:Path, index:int)->None:
-    img=Image.new("RGB",(W,H)); px=img.load()
+def make_background(path:Path, index:int, presenter:Path)->None:
+    # Composite one consistent full-body presenter/LCD anchor across all scenes.
+    presenter_img=Image.open(presenter).convert("RGB").resize((W,H),Image.Resampling.LANCZOS)
+    base=Image.new("RGB",(W,H))
+    px=base.load()
     for y in range(H):
         t=y/(H-1)
         for x in range(W):
             glow=max(0,1-abs(x-W/2)/(W*.72))
-            px[x,y]=(int(8+8*t+5*glow),int(14+18*t+7*glow),int(28+30*t+12*glow))
-    d=ImageDraw.Draw(img,"RGBA")
-    # Premium v3: presenter-safe cinematic studio composition with LCD/HUD framing.
-    d.rectangle((24,24,W-24,H-24),outline=(110,200,255,180),width=3)
-    d.rounded_rectangle((74,260,W-74,1680),radius=54,fill=(3,8,18,125),outline=(90,180,240,150),width=3)
-    d.rounded_rectangle((108,330,W-108,1180),radius=42,fill=(5,12,24,105),outline=(130,210,255,135),width=2)
-    d.rounded_rectangle((130,360,W-130,395),radius=16,fill=(70,160,235,160))
-    # Clear presenter zone: avoid placing text over face/body.
-    d.rounded_rectangle((320,500,760,1560),radius=90,outline=(130,210,255,70),width=2)
-    for yy in (430, 1610):
-        d.line((112,yy,968,yy),fill=(110,200,255,90),width=2)
+            px[x,y]=(int(6+7*t+4*glow),int(10+14*t+6*glow),int(20+24*t+10*glow))
+    base=Image.blend(base,presenter_img,0.82)
+    d=ImageDraw.Draw(base,"RGBA")
+    d.rectangle((24,24,W-24,H-24),outline=(110,200,255,170),width=3)
+    d.rounded_rectangle((74,260,W-74,1680),radius=54,outline=(90,180,240,125),width=3)
+    d.rounded_rectangle((320,500,760,1560),radius=90,outline=(130,210,255,55),width=2)
+    for yy in (430,1610):
+        d.line((112,yy,968,yy),fill=(110,200,255,80),width=2)
     d.text((W//2,185),BRAND,anchor="mm",fill=(220,240,255,235))
     d.text((W//2,215),"PREMIUM TECH • V3",anchor="mm",fill=(140,205,240,180))
-    img.save(path,format="PNG")
+    base.save(path,format="PNG")
 
 def run_renderer(title,body,footer,out):
     subprocess.run(["python","scripts/render_text.py",title,body,footer,str(out)],check=True)
@@ -66,9 +67,11 @@ def make_motion_scene(background:Path,output:Path,direction:int)->None:
     subprocess.run(["ffmpeg","-y","-loop","1","-i",str(background),"-vf",vf,"-t",str(SCENE_SECONDS),"-r",str(FPS),"-an","-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-movflags","+faststart",str(output)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 
 scene_videos=[]
+presenter_asset=OUT/"presenter_anchor.png"
+generate_presenter_asset()
 for i,text in enumerate(SCENES,1):
     bg=OUT/f"scene_{i}_background.png"; overlay=OUT/f"scene_{i}_text.png"; motion=OUT/f"scene_{i}_motion.mp4"; scene=OUT/f"scene_{i}.mp4"
-    make_background(bg,i); run_renderer(TOPIC,text,f"{BRAND} • Scene {i}",overlay); make_motion_scene(bg,motion,i)
+    make_background(bg,i,presenter_asset); run_renderer(TOPIC,text,f"{BRAND} • Scene {i}",overlay); make_motion_scene(bg,motion,i)
     subprocess.run(["ffmpeg","-y","-i",str(motion),"-loop","1","-i",str(overlay),"-filter_complex","[0:v][1:v]overlay=0:0:format=auto,format=yuv420p,setsar=1","-t",str(SCENE_SECONDS),"-r",str(FPS),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-an",str(scene)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
     motion.unlink(missing_ok=True); scene_videos.append(scene)
 
@@ -104,5 +107,5 @@ subprocess.run(["ffmpeg","-v","error","-i",str(video),"-f","null","-"],check=Tru
 for p in scene_videos: p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_background.png"): p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_text.png"): p.unlink(missing_ok=True)
-for p in [silent,with_cta,cta]: p.unlink(missing_ok=True)
+for p in [silent,with_cta,cta,presenter_asset]: p.unlink(missing_ok=True)
 print(f"Verified independent English 1080x1920 H.264/AAC MP4 for {BRAND}: {video} ({actual_duration:.3f}s)")
