@@ -40,4 +40,3 @@ def check_video(path: str, *, max_black_seconds: float = 0.75, max_freeze_second
         return {"passed": True, "reason": "visual_quality_passed", "max_black_seconds": black, "max_freeze_seconds": freeze}
     except (OSError, ValueError):
         return {"passed": False, "reason": "visual_probe_failed"}
-"
