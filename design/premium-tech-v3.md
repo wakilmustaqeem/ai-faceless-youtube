@@ -27,3 +27,12 @@ Prefer locally generated/open assets and free-stock footage where licensing is v
 
 ## QA
 The production workflow must still enforce MP4/container, resolution, duration, black-frame/freeze, voice, and captions checks. A successful CI run is not a substitute for human visual/audio approval.
+
+
+## Presenter asset implementation
+
+- The production renderer now generates one full-body presenter anchor before scene rendering.
+- Default provider is Pollinations image generation, with `PRESENTER_ASSET` available for a locally supplied reviewed asset.
+- The anchor is reused across all scenes to preserve presenter identity instead of generating a different person per scene.
+- The generated asset is not treated as publication approval: visual QA and human review remain mandatory.
+- No celebrity likeness, trademarked logo, watermark, or unverified third-party footage is requested by the generation prompt.
