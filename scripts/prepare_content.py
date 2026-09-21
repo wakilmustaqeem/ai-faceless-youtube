@@ -11,7 +11,7 @@ from scripts.generate_captions import generate_captions
 
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
-SCENE_SECONDS=7.5; XFADE_SECONDS=0.55; DURATION=30
+SCENE_SECONDS=8.05; XFADE_SECONDS=0.55; DURATION=30
 DURATION_TOLERANCE=0.10
 BRAND="AI & IT Future Tech"
 TOPIC="How AI Agents Are Changing Software Workflows"
@@ -55,8 +55,8 @@ def run_cta_renderer(out):
 def make_motion_scene(background:Path,output:Path,direction:int)->None:
     zoom="min(zoom+0.00075,1.12)"
     x="iw/2-(iw/zoom/2)+sin(on/70)*18" if direction%2 else "iw/2-(iw/zoom/2)-sin(on/70)*18"
-    vf=f"scale=1220:2170:force_original_aspect_ratio=increase,crop=1220:2170,zoompan=z='{zoom}':x='{x}':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30,eq=contrast=1.03:saturation=1.02:brightness=-0.02,format=yuv420p"
-    subprocess.run(["ffmpeg","-y","-loop","1","-i",str(background),"-vf",vf,"-t",str(SCENE_SECONDS),"-r",str(FPS),"-an","-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p",str(output)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+    vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,eq=contrast=1.03:saturation=1.02:brightness=-0.02,format=yuv420p"
+    subprocess.run(["ffmpeg","-y","-loop","1","-i",str(background),"-vf",vf,"-t",str(SCENE_SECONDS),"-r",str(FPS),"-an","-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-movflags","+faststart",str(output)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 
 scene_videos=[]
 for i,text in enumerate(SCENES,1):
