@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw
 from scripts.generate_voice import synthesize
 from governance.voice_quality_gate import check_voice
 from governance.visual_quality_gate import check_video
+from governance.captions_quality_gate import check_captions
+from scripts.generate_captions import generate_captions
 
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
@@ -76,6 +78,10 @@ subprocess.run(["ffmpeg","-y","-i",str(silent),"-loop","1","-i",str(cta),"-filte
 voice=OUT/"voice.mp3"; synthesize(VOICE_TEXT,str(voice))
 voice_qa=check_voice(str(voice))
 if not voice_qa["passed"]: raise SystemExit(f"Voice QA blocked: {voice_qa}")
+captions=OUT/"captions.srt"
+generate_captions(VOICE_TEXT, DURATION, str(captions))
+captions_qa=check_captions(str(captions), expected_duration=DURATION)
+if not captions_qa["passed"]: raise SystemExit(f"Captions QA blocked: {captions_qa}")
 video=OUT/"video.mp4"
 subprocess.run(["ffmpeg","-y","-i",str(with_cta),"-i",str(voice),"-map","0:v:0","-map","1:a:0","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-c:a","aac","-profile:a","aac_low","-ar","44100","-ac","2","-b:a","128k","-af",f"apad=pad_dur={DURATION}","-movflags","+faststart",str(video)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 probe=subprocess.run(["ffprobe","-v","error","-show_entries","format=format_name,duration:stream=index,codec_type,codec_name,pix_fmt,width,height","-of","default=noprint_wrappers=1",str(video)],check=True,capture_output=True,text=True)
