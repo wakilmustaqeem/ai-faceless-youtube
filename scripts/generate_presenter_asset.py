@@ -13,6 +13,8 @@ import os
 from PIL import Image
 
 W, H = 1080, 1920
+MIN_W, MIN_H = 512, 900
+ASPECT_TOLERANCE = 0.03
 OUT = Path("output/presenter_anchor.png")
 
 PROMPT = (
@@ -57,14 +59,22 @@ def main() -> None:
         download(url, OUT)
 
     with Image.open(OUT) as image:
-        if image.width < 720 or image.height < 1280:
+        width, height = image.size
+        if width < MIN_W or height < MIN_H:
             raise RuntimeError(
-                f"Presenter asset is too small: {image.width}x{image.height}; "
-                "expected at least 720x1280"
+                f"Presenter asset is too small: {width}x{height}; "
+                f"expected at least {MIN_W}x{MIN_H}"
             )
+        if abs((width / height) - (W / H)) > ASPECT_TOLERANCE:
+            raise RuntimeError(
+                f"Presenter asset has unexpected aspect ratio: {width}x{height}; "
+                "expected approximately 9:16"
+            )
+        upscaled = width < W or height < H
         image.convert("RGB").resize((W, H), Image.Resampling.LANCZOS).save(OUT)
 
-    print(f"Verified presenter anchor: {OUT} ({W}x{H})")
+    suffix = " (upscaled from provider output)" if upscaled else ""
+    print(f"Verified presenter anchor: {OUT} ({W}x{H}){suffix}")
 
 if __name__ == "__main__":
     main()
