@@ -1,0 +1,18 @@
+{
+  "topic": "Your video topic",
+  "sources": [
+    {
+      "title": "Source title",
+      "url": "https://example.com/article",
+      "summary": "Your short description of why this source matters."
+    }
+  ],
+  "claims": [
+    {
+      "claim": "The factual statement you want to use.",
+      "source_url": "https://example.com/article",
+      "source_title": "Source title",
+      "evidence": "Exact short passage from the source supporting the claim."
+    }
+  ]
+}
