@@ -40,12 +40,19 @@ def run(research: dict) -> dict:
             "claims": claims,
         }
 
+    source_summaries = "\n".join(
+        f"- {item.get('title', 'Source')}: {item.get('summary', '').strip()}"
+        for item in sources
+        if item.get("summary")
+    )
     evidence = "\n".join(
         f"- {item['source_title']}: {item['evidence']} ({item['source_url']})"
         for item in verified_claims
     )
     script = (
         f"{topic}\n\n"
+        "Research synthesis\n"
+        f"{source_summaries}\n\n"
         "What the verified evidence shows\n"
         f"{evidence}\n\n"
         "Originality note\n"
