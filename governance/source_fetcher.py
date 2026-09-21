@@ -1,18 +1,39 @@
-"""Free, deterministic source fetching and provenance checks for claim evidence."""
+"""Free, deterministic source fetching with basic SSRF and redirect hardening."""
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import re
+import socket
 from html import unescape
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import Request, build_opener, HTTPRedirectHandler
 
 MAX_BYTES = 2_000_000
 TIMEOUT_SECONDS = 10
+MAX_REDIRECTS = 3
+ALLOWED_CONTENT_TYPES = ("text/html", "text/plain", "application/json", "application/xml", "text/xml")
+
+class _LimitedRedirectHandler(HTTPRedirectHandler):
+    max_redirections = MAX_REDIRECTS
+
+def _public_ip(hostname: str) -> bool:
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except OSError:
+        return False
+    addresses = {info[4][0] for info in infos}
+    if not addresses:
+        return False
+    for address in addresses:
+        ip = ipaddress.ip_address(address)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+            return False
+    return True
 
 def _public_http_url(url: str) -> bool:
     p = urlparse(url.strip())
-    return p.scheme in {"http", "https"} and bool(p.netloc) and not p.username and not p.password
+    return p.scheme in {"http", "https"} and bool(p.netloc) and not p.username and not p.password and _public_ip(p.hostname or "")
 
 def _normalize(text: str) -> str:
     text = unescape(re.sub(r"<[^>]+>", " ", text))
@@ -20,15 +41,20 @@ def _normalize(text: str) -> str:
 
 def fetch_source(url: str) -> dict:
     if not _public_http_url(url):
-        return {"passed": False, "reason": "invalid_source_url", "url": url}
+        return {"passed": False, "reason": "invalid_or_private_source_url", "url": url}
     try:
+        opener = build_opener(_LimitedRedirectHandler)
         req = Request(url, headers={"User-Agent": "AI-IT-Future-Tech-Research/1.0"})
-        with urlopen(req, timeout=TIMEOUT_SECONDS) as response:
-            data = response.read(MAX_BYTES + 1)
+        with opener.open(req, timeout=TIMEOUT_SECONDS) as response:
             final_url = response.geturl()
+            if not _public_http_url(final_url):
+                return {"passed": False, "reason": "unsafe_redirect_target", "url": final_url}
+            data = response.read(MAX_BYTES + 1)
             if len(data) > MAX_BYTES:
                 return {"passed": False, "reason": "source_too_large", "url": final_url}
-            content_type = response.headers.get("Content-Type", "")
+            content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+        if content_type and content_type not in ALLOWED_CONTENT_TYPES:
+            return {"passed": False, "reason": "unsupported_content_type", "url": final_url, "content_type": content_type}
         text = _normalize(data.decode("utf-8", errors="replace"))
         if not text:
             return {"passed": False, "reason": "empty_source", "url": final_url}
