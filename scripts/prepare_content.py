@@ -5,6 +5,7 @@ import os, subprocess
 from PIL import Image, ImageDraw
 from scripts.generate_voice import synthesize
 from governance.voice_quality_gate import check_voice
+from governance.visual_quality_gate import check_video
 
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
@@ -84,6 +85,8 @@ if "format_name=mov,mp4,m4a,3gp,3g2,mj2" not in probe.stdout: raise SystemExit("
 duration_line=next((line for line in probe.stdout.splitlines() if line.startswith("duration=")), "")
 actual_duration=float(duration_line.split("=",1)[1]) if duration_line else -1.0
 if abs(actual_duration-DURATION) > DURATION_TOLERANCE: raise SystemExit(f"Generated MP4 duration {actual_duration:.3f}s is outside {DURATION}±{DURATION_TOLERANCE}s")
+visual_qa=check_video(str(video))
+if not visual_qa["passed"]: raise SystemExit(f"Visual QA blocked: {visual_qa}")
 subprocess.run(["ffmpeg","-v","error","-i",str(video),"-f","null","-"],check=True)
 for p in scene_videos: p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_background.png"): p.unlink(missing_ok=True)
