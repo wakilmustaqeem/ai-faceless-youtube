@@ -1,17 +1,13 @@
-"""Source-backed research stage for the independent channel.
-
-Research is deliberately deterministic: it accepts a topic plus explicit source
-records and refuses to approve a package without usable evidence.
-"""
+"""Source-backed research stage with mandatory claim evidence records."""
 
 from __future__ import annotations
 
+from governance.claim_evidence import verify_claims
 
-def run(topic: str, sources: list[dict] | None = None) -> dict:
+def run(topic: str, sources: list[dict] | None = None, claims: list[dict] | None = None) -> dict:
     topic = topic.strip()
     if not topic:
         raise ValueError("topic is required")
-
     normalized = []
     for source in sources or []:
         url = str(source.get("url", "")).strip()
@@ -19,26 +15,9 @@ def run(topic: str, sources: list[dict] | None = None) -> dict:
         summary = str(source.get("summary", "")).strip()
         if url and title and summary:
             normalized.append({"title": title, "url": url, "summary": summary})
-
     if not normalized:
-        return {
-            "stage": "research",
-            "topic": topic,
-            "sources": [],
-            "status": "needs_sources",
-        }
-
-    return {
-        "stage": "research",
-        "topic": topic,
-        "sources": normalized,
-        "status": "approved",
-    }
-
-
-if __name__ == "__main__":
-    import json
-    import sys
-
-    topic = " ".join(sys.argv[1:]).strip() or "demo-topic"
-    print(json.dumps(run(topic), ensure_ascii=False, indent=2))
+        return {"stage": "research", "topic": topic, "sources": [], "status": "needs_sources"}
+    evidence_result = verify_claims(claims)
+    if not evidence_result["passed"]:
+        return {"stage": "research", "topic": topic, "sources": normalized, "claims": evidence_result["claims"], "status": "needs_evidence", "evidence_reason": evidence_result["reason"]}
+    return {"stage": "research", "topic": topic, "sources": normalized, "claims": evidence_result["claims"], "status": "approved"}
