@@ -4,10 +4,15 @@ from datetime import datetime, timezone
 import os, subprocess
 from PIL import Image, ImageDraw
 from scripts.generate_voice import synthesize
+from governance.voice_quality_gate import check_voice
+from governance.visual_quality_gate import check_video
+from governance.captions_quality_gate import check_captions
+from scripts.generate_captions import generate_captions
 
 OUT=Path("output"); OUT.mkdir(exist_ok=True)
 W,H,FPS=1080,1920,30
-SCENE_SECONDS=7.5; XFADE_SECONDS=0.55; DURATION=30
+SCENE_SECONDS=8.05; XFADE_SECONDS=0.55; DURATION=30
+DURATION_TOLERANCE=0.10
 BRAND="AI & IT Future Tech"
 TOPIC="How AI Agents Are Changing Software Workflows"
 SCENES=[
@@ -23,7 +28,7 @@ VOICE_TEXT=("Welcome to AI and IT Future Tech. Today we are exploring how AI age
 "This is AI and IT Future Tech, bringing practical explainers on AI, IT, and the future of technology.")
 SCRIPT=f"# {TOPIC}\n\n{VOICE_TEXT}\n\nReview note: verify current product capabilities and source claims before publication.\n"
 metadata=(f"brand: {BRAND}\ntopic: {TOPIC}\ncreated_utc: {datetime.now(timezone.utc).isoformat()}\n"
-f"source_language: en\nduration_target_seconds: {DURATION}\nformat: YouTube Shorts 9:16\nresolution: {W}x{H}\nframe_rate: {FPS}\n"
+f"source_language: en\nduration_target_seconds: {DURATION}\nduration_tolerance_seconds: {DURATION_TOLERANCE}\nformat: YouTube Shorts 9:16\nresolution: {W}x{H}\nframe_rate: {FPS}\n"
 f"voice: Microsoft Edge Neural English ({os.getenv('TTS_VOICE','en-US-GuyNeural')})\nvideo_codec: H.264\naudio_codec: AAC-LC\nstatus: REVIEW_REQUIRED\n")
 (OUT/"script.md").write_text(SCRIPT,encoding="utf-8"); (OUT/"metadata.txt").write_text(metadata,encoding="utf-8")
 
@@ -50,8 +55,8 @@ def run_cta_renderer(out):
 def make_motion_scene(background:Path,output:Path,direction:int)->None:
     zoom="min(zoom+0.00075,1.12)"
     x="iw/2-(iw/zoom/2)+sin(on/70)*18" if direction%2 else "iw/2-(iw/zoom/2)-sin(on/70)*18"
-    vf=f"scale=1220:2170:force_original_aspect_ratio=increase,crop=1220:2170,zoompan=z='{zoom}':x='{x}':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30,eq=contrast=1.03:saturation=1.02:brightness=-0.02,format=yuv420p"
-    subprocess.run(["ffmpeg","-y","-loop","1","-i",str(background),"-vf",vf,"-t",str(SCENE_SECONDS),"-r",str(FPS),"-an","-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p",str(output)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+    vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,eq=contrast=1.03:saturation=1.02:brightness=-0.02,format=yuv420p"
+    subprocess.run(["ffmpeg","-y","-loop","1","-i",str(background),"-vf",vf,"-t",str(SCENE_SECONDS),"-r",str(FPS),"-an","-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-movflags","+faststart",str(output)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 
 scene_videos=[]
 for i,text in enumerate(SCENES,1):
@@ -70,15 +75,27 @@ silent=OUT/"silent.mp4"
 subprocess.run(["ffmpeg","-y",*inputs,"-filter_complex",";".join(filters),"-map",f"[{current}]","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-preset","medium","-movflags","+faststart",str(silent)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 cta=OUT/"subscribe_cta.png"; run_cta_renderer(cta); start=(len(SCENES)-1)*(SCENE_SECONDS-XFADE_SECONDS); with_cta=OUT/"silent_with_cta.mp4"
 subprocess.run(["ffmpeg","-y","-i",str(silent),"-loop","1","-i",str(cta),"-filter_complex",f"[0:v][1:v]overlay=0:0:format=auto:enable='between(t,{start:.2f},{DURATION})'[v]","-map","[v]","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-preset","medium","-movflags","+faststart",str(with_cta)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-voice=OUT/"voice.mp3"; synthesize(VOICE_TEXT,str(voice)); video=OUT/"video.mp4"
+voice=OUT/"voice.mp3"; synthesize(VOICE_TEXT,str(voice))
+voice_qa=check_voice(str(voice))
+if not voice_qa["passed"]: raise SystemExit(f"Voice QA blocked: {voice_qa}")
+captions=OUT/"captions.srt"
+generate_captions(VOICE_TEXT, DURATION, str(captions))
+captions_qa=check_captions(str(captions), expected_duration=DURATION)
+if not captions_qa["passed"]: raise SystemExit(f"Captions QA blocked: {captions_qa}")
+video=OUT/"video.mp4"
 subprocess.run(["ffmpeg","-y","-i",str(with_cta),"-i",str(voice),"-map","0:v:0","-map","1:a:0","-t",str(DURATION),"-c:v","libx264","-profile:v","baseline","-level","4.0","-pix_fmt","yuv420p","-r",str(FPS),"-fps_mode","cfr","-c:a","aac","-profile:a","aac_low","-ar","44100","-ac","2","-b:a","128k","-af",f"apad=pad_dur={DURATION}","-movflags","+faststart",str(video)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 probe=subprocess.run(["ffprobe","-v","error","-show_entries","format=format_name,duration:stream=index,codec_type,codec_name,pix_fmt,width,height","-of","default=noprint_wrappers=1",str(video)],check=True,capture_output=True,text=True)
 required=["codec_type=video","codec_name=h264","pix_fmt=yuv420p","codec_type=audio","codec_name=aac",f"width={W}",f"height={H}"]
 if any(x not in probe.stdout for x in required): raise SystemExit("Generated MP4 failed stream/resolution checks")
 if "format_name=mov,mp4,m4a,3gp,3g2,mj2" not in probe.stdout: raise SystemExit("Generated file is not a standard MP4 container")
+duration_line=next((line for line in probe.stdout.splitlines() if line.startswith("duration=")), "")
+actual_duration=float(duration_line.split("=",1)[1]) if duration_line else -1.0
+if abs(actual_duration-DURATION) > DURATION_TOLERANCE: raise SystemExit(f"Generated MP4 duration {actual_duration:.3f}s is outside {DURATION}±{DURATION_TOLERANCE}s")
+visual_qa=check_video(str(video))
+if not visual_qa["passed"]: raise SystemExit(f"Visual QA blocked: {visual_qa}")
 subprocess.run(["ffmpeg","-v","error","-i",str(video),"-f","null","-"],check=True)
 for p in scene_videos: p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_background.png"): p.unlink(missing_ok=True)
 for p in OUT.glob("scene_*_text.png"): p.unlink(missing_ok=True)
 for p in [silent,with_cta,cta]: p.unlink(missing_ok=True)
-print(f"Verified independent English 1080x1920 H.264/AAC MP4 for {BRAND}: {video}")
+print(f"Verified independent English 1080x1920 H.264/AAC MP4 for {BRAND}: {video} ({actual_duration:.3f}s)")
