@@ -1,8 +1,8 @@
-"""Source-backed research stage with mandatory claim evidence records."""
+"""Source-backed research stage with real source verification."""
 
 from __future__ import annotations
 
-from governance.claim_evidence import verify_claims
+from governance.evidence_verifier import verify_claims_against_sources
 
 def run(topic: str, sources: list[dict] | None = None, claims: list[dict] | None = None) -> dict:
     topic = topic.strip()
@@ -17,7 +17,7 @@ def run(topic: str, sources: list[dict] | None = None, claims: list[dict] | None
             normalized.append({"title": title, "url": url, "summary": summary})
     if not normalized:
         return {"stage": "research", "topic": topic, "sources": [], "status": "needs_sources"}
-    evidence_result = verify_claims(claims)
+    evidence_result = verify_claims_against_sources(claims)
     if not evidence_result["passed"]:
         return {"stage": "research", "topic": topic, "sources": normalized, "claims": evidence_result["claims"], "status": "needs_evidence", "evidence_reason": evidence_result["reason"]}
     return {"stage": "research", "topic": topic, "sources": normalized, "claims": evidence_result["claims"], "status": "approved"}
