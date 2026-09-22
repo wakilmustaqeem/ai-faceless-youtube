@@ -1,4 +1,4 @@
-# Episode 01 — Shot 11: UNKNOWN SOURCE / 2027 — Cliffhanger Lock v1
+# Episode 01 — Shot 11: UNKNOWN SOURCE / 2027 — Cliffhanger Lock v2
 
 ## Purpose
 End Episode 1 with the first concrete clue that the LEGACY CORE signal is connected to another time period, without explaining the time bridge.
@@ -26,6 +26,29 @@ Optional presenter whisper:
 “2027?”
 
 Do not explain who or what is in 2027.
+
+## Teleportation visual continuity rule
+This shot is only the mystery setup. **No teleportation occurs in Shot 11.**
+
+When a traveler later teleports through the Time-Travel Application, every major teleport must use the established series signature:
+**YEAR SELECT → BRIGHT LIGHT BURST → TELEPORT → SCREEN DESTINATION UPDATE → MATERIALIZATION.**
+
+The light burst should be brief, cinematic and technologically grounded: controlled glow, particles, subtle distortion and motion blur. The departure and arrival effects must be synchronized. This approach follows established VFX practice of matching the vanish/appearance with clean plates, particles, distortion and synced sound. citeturn0search1turn0search5
+
+## Destination screen wording
+After a successful teleport, the application screen must update to the new destination.
+
+For a major new destination/world, the first destination-state label is:
+
+**NEW WORLD**
+
+Then the UI resolves to the actual:
+**YEAR: [year]**
+**ERA: [PAST / PRESENT / FUTURE]**
+and, where appropriate:
+**LOCATION: [location]**
+
+“NEW WORLD” is a story/UI transition label, not a literal claim that every destination is another planet.
 
 ## Visual continuity
 - Same 2040 classroom from Shots 1–10.
@@ -63,9 +86,7 @@ The audience should leave Episode 1 with one clear question:
 **Why is a 2040 classroom receiving a signal from 2027?**
 
 ## Local generation
-Use reference-first image-to-video for continuity. Wan2.2 TI2V-5B is a planned local route after hardware preflight; official model documentation describes 720P at 24 FPS and support for both text-to-video and image-to-video. citeturn0search0turn0search7
-
-For the vertical master, the documented TI2V-5B path supports a 704×1280 orientation, while the final delivery should remain native 9:16. citeturn0search1
+Use reference-first image-to-video for continuity. Wan2.2 TI2V-5B is a planned local route after hardware preflight; final render readiness must not be claimed before the actual production-machine preflight.
 
 ## Acceptance gate
 PASS only if:
@@ -73,7 +94,7 @@ PASS only if:
 - 2027 is the only new time-related reveal.
 - Presenter and students react naturally, not theatrically.
 - Exactly three fixed displays remain.
-- No portal/time-machine imagery appears.
+- No portal/time-machine imagery appears in this shot.
 - Continuity with Shots 1–10 is preserved.
 - The cut to black feels intentional and immediate.
 - Episode 1 does not explain the mystery.
@@ -82,4 +103,3 @@ PASS only if:
 ## Episode 1 completion gate
 Shots 1–11 now form the complete production-lock sequence:
 Hook → Presenter → Build → First Car → Student Request → Permission → Steering Bug → Debug Fix → Successful Race → LEGACY CORE → UNKNOWN SOURCE 2027 → Cut to Black.
-
