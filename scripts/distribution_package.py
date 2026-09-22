@@ -31,20 +31,42 @@ def main() -> None:
     if output.exists():
         raise SystemExit(f"REFUSED: output already exists: {output}")
 
-    payload = {
-        "publishing": False,
-        "human_approval_required": True,
-        "video": str(video),
-        "title": args.title,
-        "description": args.description,
-        "platforms": {
-            platform: {
+    platform_payload = {}
+    for platform in dict.fromkeys(args.platform):
+        if platform in ("instagram", "tiktok"):
+            platform_payload[platform] = {
                 "enabled": True,
                 "mode": "manual_or_api",
                 "status": "READY_FOR_REVIEW",
+                "caption": f"{args.title}\\n\\n{args.description}",
+                "media": "video",
             }
-            for platform in dict.fromkeys(args.platform)
-        },
+        elif platform == "wordpress":
+            platform_payload[platform] = {
+                "enabled": True,
+                "mode": "manual_or_api",
+                "status": "READY_FOR_REVIEW",
+                "post_title": args.title,
+                "post_body": args.description,
+                "media": "video",
+            }
+        else:
+            platform_payload[platform] = {
+                "enabled": True,
+                "mode": "manual_or_api",
+                "status": "READY_FOR_REVIEW",
+                "message": f"{args.title}\\n\\n{args.description}",
+                "media": "video",
+            }
+
+    payload = {
+        "publishing": False,
+        "human_approval_required": True,
+        "credentials": "environment_only",
+        "video": str(video),
+        "title": args.title,
+        "description": args.description,
+        "platforms": platform_payload,
     }
 
     output.parent.mkdir(parents=True, exist_ok=True)
