@@ -41,3 +41,22 @@ credentials:
   youtube_channel: independent
   storage: independent
   provider_keys: environment_only
+  distribution: environment_only
+
+distribution:
+  publishing: false
+  human_approval_required: true
+  platforms:
+    facebook:
+      enabled: true
+      mode: manual_or_api
+    instagram:
+      enabled: true
+      mode: manual_or_api
+    tiktok:
+      enabled: true
+      mode: manual_or_api
+    wordpress:
+      enabled: true
+      mode: manual_or_api
+
