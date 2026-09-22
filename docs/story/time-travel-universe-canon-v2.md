@@ -1,26 +1,71 @@
-# RACING GAME — TIME-TRAVEL UNIVERSE CANON v2
+# RACING GAME — TIME-TRAVEL UNIVERSE CANON v2.1
 
-## Core Update
-The Time-Travel Mobile Application is the primary interface of the universe.
+## Core Story Truth
 
-A traveler selects a YEAR in the application and can travel to the corresponding past, present or future era. The application prepares the traveler for the destination era.
+The **Time-Travel Mobile Application** is the primary interface of the universe.
 
-## Era Adaptation System
-Every jump automatically adapts:
-- clothing / wardrobe
-- environment and architecture
-- technology level
-- devices and props
-- language/register where story-relevant
-- money/payment method where relevant
-- transportation
-- food and everyday objects
-- visual styling and social context
+**Wakil is the original mastermind behind the application. Wakil creates/develops the core Time-Travel concept and gifts the application to his son Mustafa. Mustafa is the HERO and central protagonist.**
 
-The adaptation exists to prevent obvious anachronisms. Historical/future settings should feel inhabited rather than like a costume set; clothing, tools, language and daily texture should match the destination era.
+This father-son distinction is permanent canon.
+
+### Core relationship
+
+**Wakil = father + mastermind + creator/giver**  
+**Mustafa = son + hero + recipient + active time-traveler**
+
+The application is Wakil's gift to Mustafa. Wakil's creator role explains the deeper architecture and safeguards; it does not replace Mustafa's protagonist role.
+
+## Hero Rule
+
+**Mustafa remains the hero.**
+
+Mustafa is the character the audience follows through the main adventure:
+- travels between eras;
+- experiences and solves Time-Travel glitches;
+- helps stranded or misrouted people;
+- builds friendships across eras;
+- learns from past, present and future;
+- makes key mission decisions;
+- faces the consequences of temporal problems;
+- grows from a student into the central cross-era problem-solver.
+
+Wakil may guide, warn, protect, explain or intervene strategically, but he does not replace Mustafa as the hero.
+
+## Wakil — The Mastermind Father
+
+Wakil is Mustafa's father and the original mastermind behind the Time-Travel Mobile Application.
+
+His role:
+- conceives and develops the Time-Travel system;
+- creates the deeper architecture and safeguards;
+- understands protected Time Gates and the Secret Core;
+- gifts the application to Mustafa;
+- watches over Mustafa's journey;
+- provides strategic guidance when the situation requires it;
+- protects people when necessary;
+- remains a trusted father figure rather than the replacement protagonist.
+
+The audience should not necessarily learn Wakil's full mastermind role immediately. It can become a major mystery/reveal later in the story.
+
+## Mustafa — The Hero
+
+Mustafa is Wakil's son.
+
+In the 2027 origin timeline:
+- Mustafa is 18 years old;
+- he is a Matric student;
+- he receives the Time-Travel Mobile Application as a gift from Wakil;
+- he becomes the primary active traveler and hero;
+- his adventures create the main emotional and story arc.
+
+Mustafa's heroism comes from his choices, courage, intelligence, kindness and willingness to help people—not merely from possessing the application.
 
 ## Time-Travel App
+
+A traveler selects a **YEAR** in the application and can travel to the corresponding past, present or future era, subject to protected-system authorization.
+
 ### User flow
+
 1. Open Time-Travel App.
 2. Select YEAR.
 3. Confirm destination.
@@ -31,65 +76,74 @@ The adaptation exists to prevent obvious anachronisms. Historical/future setting
 8. Return year can be selected unless a story event causes a controlled lock/glitch.
 
 ### Destination modes
+
 - PAST
 - PRESENT
 - FUTURE
 
-The app can move between eras. The story does not treat the year selector as unrestricted Root authority; access to sensitive Time Gates, the Secret Core and protected creator functions remains governed by authorization.
+The year selector does not equal unrestricted Root authority. Sensitive Time Gates, the Secret Core and protected creator functions remain authorization-governed.
+
+## Era Adaptation System
+
+Every destination year must feel like its own real world.
+
+The application adapts, where story-appropriate:
+- clothing / wardrobe;
+- hair and styling;
+- environment and architecture;
+- technology level;
+- devices and props;
+- language/register;
+- money/payment method;
+- transportation;
+- food and everyday objects;
+- visual/social context;
+- ambient sound.
+
+A traveler arriving in a different era should not look like a modern person dropped into a costume set. The year must be visible through the complete environment.
 
 ## Glitch Rule
-When the Time-Travel App glitches, affected travelers can become stranded, misrouted, disconnected or exposed to a temporal instability.
 
-The recurring rescue rule is:
+When the Time-Travel App glitches, travelers can become stranded, misrouted, disconnected or exposed to temporal instability.
 
-**Glitch → Wakil arrives/acts → Wakil helps → people become friends.**
+Primary hero rescue engine:
 
-Wakil is not a cold controller. He is a kind, sensible, brave and helpful young creator who protects people caught in temporal problems.
+**GLITCH → MUSTAFA ARRIVES/ACTS → MUSTAFA HELPS → PEOPLE BECOME FRIENDS → NEW MISSION**
 
-## WAKIL — REPLACES MUSTAFA
-The protagonist/creator identity is now:
-
-**Name: Wakil**
-
-- Original creator of Racing Game / Time-Travel system.
-- Age: 18 in 2027.
-- Matric student in 2027.
-- Nek, samajhdar, helpful and responsible.
-- Treats people from different eras with respect.
-- Helps travelers affected by glitches.
-- Builds friendships across generations.
-- Holds the true Root authority and Secret Core.
-- Can grant/revoke protected access.
-- Does not use Root authority casually.
-
-All future references to the former creator name Mustafa must use **Wakil** unless a historical artifact explicitly preserves an older name as an in-story mystery.
+Wakil can guide or intervene strategically, but Mustafa remains the visible adventure hero.
 
 ## Friendship Engine
-People Wakil rescues are not disposable side characters.
 
-Each rescued person can become:
-- a friend;
-- a future collaborator;
-- a source of knowledge/talent;
-- a trusted contact in another era;
-- part of a cross-era team.
+People Mustafa helps are not disposable side characters.
 
-Friendship develops through actions: rescue, problem-solving, exchange, trust and shared missions.
+They can become:
+- friends;
+- future collaborators;
+- sources of knowledge/talent;
+- trusted contacts in another era;
+- members of cross-era teams.
+
+Friendship develops through rescue, problem-solving, trust, exchange and shared missions.
 
 ## Time Commerce
-The existing two-way exchange remains:
+
+The two-way exchange remains:
+
 - Future → Past: authorized future tools, devices, designs, materials and technology.
 - Past → Future: crafts, products, designs, ideas, creative methods and human talent.
 
-Every transferred object still requires a temporal ledger entry.
+Every transferred object still requires a temporal ledger entry and appropriate authorization.
 
 ## Timeline Safety
-Time travel is powerful, but the story keeps clear rules and applies them consistently. The Time-Travel App does not automatically grant unrestricted access to every protected function.
 
-The default story rule remains:
-**Travel can connect eras; it does not automatically grant Root authority.**
+Time travel connects eras but does not automatically grant unrestricted Root authority.
+
+**Travel ≠ Root access.**
+
+The application can provide ordinary travel capability while protected creator functions remain locked behind authorization.
 
 ## Production Rule
+
 For every episode, the destination year must determine:
 - wardrobe;
 - hair/styling;
@@ -102,11 +156,19 @@ For every episode, the destination year must determine:
 - ambient sound;
 - UI styling.
 
-A 2027 scene must visually read as 2027. A 2040 scene must visually read as 2040. A 2090 scene must visually read as 2090. Earlier or later eras receive their own research-backed visual package.
+A 2027 scene must visually read as 2027.  
+A 2040 scene must visually read as 2040.  
+A 2090 scene must visually read as 2090.
 
-## Character Rule
-Wakil's defining trait is not power.
+Earlier and later eras receive their own research-backed visual package.
 
-His defining trait is **helping people**.
+## Permanent Character Rule
 
-He becomes the connective human figure across eras because people remember that he helped them when the Time-Travel system failed.
+**Wakil's defining role: mastermind father.**  
+**Mustafa's defining role: hero son.**
+
+The universe must never again describe Wakil as replacing Mustafa as the protagonist.
+
+## Theme
+
+**“A father built the door. He gifted it to his son. The son became the hero who walked through it.”**
