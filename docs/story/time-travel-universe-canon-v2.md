@@ -13,7 +13,7 @@ This father-son distinction is permanent canon.
 **Wakil = father + mastermind + creator/giver**  
 **Mustafa = son + hero + recipient + active time-traveler**
 
-The application is Wakil's gift to Mustafa. Wakil's creator role explains the deeper architecture and safeguards; it does not replace Mustafa's protagonist role.
+The application is Wakil's gift to Mustafa. Wakil's creator role explains the deeper architecture and safeguards; it does not replace Mustafa's protagonist role. FM, Walida, Mustafa, Mujtaba, Khadija and Qirat all have full authorized family access and control; this shared authority does not replace Mustafa's protagonist role.
 
 ## Hero Rule
 
@@ -29,7 +29,7 @@ Mustafa is the character the audience follows through the main adventure:
 - faces the consequences of temporal problems;
 - grows from a student into the central cross-era problem-solver.
 
-Wakil may guide, warn, protect, explain or intervene strategically, but he does not replace Mustafa as the hero.
+Wakil may guide, warn, protect, explain or intervene strategically, while FM, Walida, Mujtaba, Khadija and Qirat may also act directly because the entire family has full access/control. None replaces Mustafa as the main hero.
 
 ## Wakil — The Mastermind Father
 
@@ -81,7 +81,7 @@ A traveler selects a **YEAR** in the application and can travel to the correspon
 - PRESENT
 - FUTURE
 
-The year selector does not equal unrestricted Root authority. Sensitive Time Gates, the Secret Core and protected creator functions remain authorization-governed.
+For the family, the year selector provides full authorized control: FM, Walida, Mustafa, Mujtaba, Khadija and Qirat may select any year, travel to past/present/future, operate Time Gates, inspect time data and return. Plot-specific locks or mysteries may exist temporarily, but no family member has a permanent access restriction.
 
 ## Era Adaptation System
 
