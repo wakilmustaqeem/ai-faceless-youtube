@@ -163,8 +163,15 @@ class Studio(tk.Tk):
         ).grid(row=18, column=0, columnspan=3, pady=6)
 
     def _pick(self, key, types):
-        """Set a path field from a user-selected file."""
-        path = filedialog.askopenfilename(filetypes=types)
+        """Pick an input asset or a new output destination without overwriting."""
+        output_keys = {"presenter_output", "voice", "output"}
+        if key in output_keys:
+            path = filedialog.asksaveasfilename(
+                title="Choose a new output file",
+                filetypes=types,
+            )
+        else:
+            path = filedialog.askopenfilename(filetypes=types)
         if path:
             self.vars[key].set(path)
 
@@ -210,22 +217,35 @@ class Studio(tk.Tk):
             messagebox.showwarning("LOCAL SETUP NOT READY", detail)
 
 
-    def _verify_source(self, source):
-        """Verify a presenter source into the protected canonical destination."""
+    def _verify_source(self, source, on_complete):
+        """Verify a presenter off the Tk event thread into the protected destination."""
         if not source:
             raise ValueError("Select or generate the full-body presenter first.")
         if VERIFIED_PRESENTER.exists():
             raise FileExistsError(
                 f"Verified presenter already exists; refusing to overwrite: {VERIFIED_PRESENTER}"
             )
-        p = self._run_local([
-            sys.executable, str(PRESENTER_VERIFY),
-            "--source", source, "--destination", str(VERIFIED_PRESENTER),
-        ])
-        if p.returncode != 0:
-            detail = (p.stderr or p.stdout).strip()[-1600:]
-            raise RuntimeError(detail or "Presenter image-content QA failed.")
-        return str(VERIFIED_PRESENTER)
+
+        def worker():
+            try:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        str(PRESENTER_VERIFY),
+                        "--source",
+                        source,
+                        "--destination",
+                        str(VERIFIED_PRESENTER),
+                    ],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                )
+            except Exception as exc:
+                result = subprocess.CompletedProcess([], 1, "", str(exc))
+            self.after(0, lambda: on_complete(result, source))
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def generate_presenter(self):
         """Generate a local presenter and verify it before exposing it to rendering."""
@@ -233,12 +253,27 @@ class Studio(tk.Tk):
         output = self.vars["presenter_output"].get().strip()
         prompt = self.prompt.get("1.0", "end").strip()
         if not model:
-            messagebox.showerror("Local model required", "Select an already-installed local diffusion model. The tool will not download one.")
+            messagebox.showerror(
+                "Local model required",
+                "Select an already-installed local diffusion model. The tool will not download one.",
+            )
             return
         if not output or Path(output).exists():
-            messagebox.showerror("Safety gate", "Choose a new presenter output filename that does not already exist.")
+            messagebox.showerror(
+                "Safety gate",
+                "Choose a new presenter output filename that does not already exist.",
+            )
             return
-        cmd=[sys.executable,str(PRESENTER_GENERATOR),"--model",model,"--output",output,"--prompt",prompt]
+        cmd = [
+            sys.executable,
+            str(PRESENTER_GENERATOR),
+            "--model",
+            model,
+            "--output",
+            output,
+            "--prompt",
+            prompt,
+        ]
         self.status.set("Generating full-body presenter with the installed local model…")
         try:
             self._run_local(cmd, lambda p: self._finish_presenter_generation(p, output))
@@ -247,33 +282,34 @@ class Studio(tk.Tk):
 
     def _finish_presenter_generation(self, p, output):
         if p.returncode != 0:
-            detail=(p.stderr or p.stdout).strip()[-1600:]
+            detail = (p.stderr or p.stdout).strip()[-1600:]
             self.status.set(detail)
             messagebox.showerror("Presenter generation failed", detail)
             return
         try:
-            verified=self._verify_source(output)
-        except (FileExistsError,RuntimeError,ValueError) as exc:
+            self._verify_source(output, self._finish_presenter_verification)
+        except (FileExistsError, RuntimeError, ValueError) as exc:
             self.status.set(str(exc))
-            messagebox.showerror("Presenter verification failed", str(exc))
-            return
-        self.vars["presenter"].set(verified)
-        self.status.set("PASS: presenter generated and image-content QA completed.")
-        messagebox.showinfo("Presenter QA PASS", verified)
+            messagebox.showerror("Presenter verification blocked", str(exc))
 
+    def _finish_presenter_verification(self, p, source):
+        if p.returncode != 0:
+            detail = (p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Presenter verification failed", detail)
+            return
+        self.vars["presenter"].set(str(VERIFIED_PRESENTER))
+        self.status.set("PASS: presenter generated and image-content QA completed.")
+        messagebox.showinfo("Presenter QA PASS", str(VERIFIED_PRESENTER))
 
     def verify_presenter(self):
         """Verify a supplied presenter and expose it only after successful QA."""
         source = self.vars["presenter"].get().strip()
         try:
-            verified = self._verify_source(source)
+            self._verify_source(source, self._finish_presenter_verification)
         except (FileExistsError, RuntimeError, ValueError) as exc:
             self.status.set(str(exc))
-            messagebox.showerror("Presenter verification failed", str(exc))
-            return
-        self.vars["presenter"].set(verified)
-        self.status.set("PASS: presenter image-content QA completed.")
-        messagebox.showinfo("Presenter QA PASS", verified)
+            messagebox.showerror("Presenter verification blocked", str(exc))
 
     def generate_voice(self):
         """Generate narration and set the voice field only after successful output QA."""
