@@ -5,17 +5,17 @@
 | Character | Relationship | Age in 2027 | Canon Role |
 |---|---|---:|---|
 | Wakil | Father | 35 | Original mastermind behind the Time-Travel Mobile Application; gifted it to Mustafa |
-| Walida | Mother | 35 | Family anchor, wise/supportive parent and recurring character |
-| Mustafa | Wakil + Walida's son; Mujtaba's elder brother | 18 | Main HERO and primary adventurer |
-| Mujtaba | Wakil + Walida's son; Mustafa's younger brother | 13 | Full-access time traveler, smartwatch developer, holder of a secret code |
-| Khadija | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | 14 | Recurring family character |
-| Qirat | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | 10 | Recurring family character |
+| FM | Mother | 35 | Family anchor, wise/supportive parent and recurring character |
+| Mustafa | Wakil + FM's son; Mujtaba's elder brother | 18 | Main HERO and primary adventurer |
+| Mujtaba | Wakil + FM's son; Mustafa's younger brother | 13 | Full-access time traveler, smartwatch developer, holder of a secret code |
+| Khadija | Daughter of Wakil and FM; younger sister of Mustafa/Mujtaba | 14 | Recurring family character |
+| Qirat | Daughter of Wakil and FM; younger sister of Mustafa/Mujtaba | 10 | Recurring family character |
 
 ## Age Lock
 
 In 2027:
 - Wakil = 35
-- Walida = 35
+- FM = 35
 - Mustafa = 18
 - Mujtaba = 13
 - Khadija = 14
@@ -27,7 +27,7 @@ Khadija and Qirat are younger sisters in the family continuity. Their ages are n
 
 All six family members have **full authorized Time-Travel access and control**:
 - Wakil
-- Walida
+- FM
 - Mustafa
 - Mujtaba
 - Khadija
@@ -78,7 +78,7 @@ Story rule:
 ## Hero Hierarchy
 
 **Wakil = 35 + original mastermind + father + giver**  
-**Walida = 35 + mother + family anchor**  
+**FM = 35 + mother + family anchor**  
 **Mustafa = 18 + MAIN HERO + elder brother**  
 **Mujtaba = 13 + full-access younger brother + smartwatch coder + secret-code holder**  
 **Khadija = 14 + younger sister**  
@@ -86,7 +86,7 @@ Story rule:
 
 Full access does NOT change the hero hierarchy.
 
-Mustafa remains the central protagonist. Mujtaba, Khadija and Qirat can all independently initiate major story actions because they have full family control authority. Wakil and Walida also retain complete control and can intervene directly whenever they choose.
+Mustafa remains the central protagonist. Mujtaba, Khadija and Qirat can all independently initiate major story actions because they have full family control authority. Wakil and FM also retain complete control and can intervene directly whenever they choose.
 
 ## Glitch Rule
 
@@ -96,9 +96,9 @@ When a time-travel glitch occurs:
 
 Either brother may be physically present in a mission. Their roles should complement rather than replace one another.
 
-## Walida
+## FM
 
-Walida is a real recurring family character.
+FM is a real recurring family character.
 
 She provides:
 - emotional grounding;
@@ -152,7 +152,7 @@ Never:
 - forget Mujtaba's smartwatch update;
 - forget Mujtaba's secret code;
 - make Khadija or Qirat older than Mustafa;
-- make Walida unrelated to the family;
+- make FM unrelated to the family;
 - treat Wakil as merely a side character.
 
 Always preserve the family structure and role hierarchy above.
