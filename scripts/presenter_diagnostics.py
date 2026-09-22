@@ -7,16 +7,21 @@ writes/overwrites assets.
 from __future__ import annotations
 
 import argparse
-import importlib.util
+import importlib
 import os
 from pathlib import Path
 
 
-def check_module(name: str) -> bool:
-    return importlib.util.find_spec(name) is not None
+def check_module(name: str):
+    """Import a dependency and return its module, or None when initialization fails."""
+    try:
+        return importlib.import_module(name)
+    except Exception:
+        return None
 
 
 def main() -> int:
+    """Run dependency/model checks and return a nonzero code when not ready."""
     parser = argparse.ArgumentParser(description="Diagnose local presenter generation prerequisites.")
     parser.add_argument("--model", default=os.getenv("PRESENTER_MODEL_PATH", ""))
     args = parser.parse_args()
@@ -25,10 +30,12 @@ def main() -> int:
     print("LOCAL PRESENTER DIAGNOSTICS")
     print("=" * 30)
 
+    modules = {}
     for name in ("torch", "diffusers"):
-        present = check_module(name)
-        print(f"{name}: {'READY' if present else 'MISSING'}")
-        ok &= present
+        module = check_module(name)
+        modules[name] = module
+        print(f"{name}: {'READY' if module is not None else 'BROKEN/MISSING'}")
+        ok &= module is not None
 
     model = Path(args.model).expanduser() if args.model else None
     if model:
@@ -39,8 +46,8 @@ def main() -> int:
         print("model path: MISSING (set PRESENTER_MODEL_PATH or pass --model)")
         ok = False
 
-    if check_module("torch"):
-        import torch
+    torch = modules.get("torch")
+    if torch is not None:
         print(f"torch version: {torch.__version__}")
         print(f"CUDA: {'READY' if torch.cuda.is_available() else 'CPU ONLY'}")
 
