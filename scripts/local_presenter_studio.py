@@ -19,6 +19,7 @@ VOICE_ELEVEN = ROOT / "scripts" / "elevenlabs_voice.py"
 PRESENTER_VERIFY = ROOT / "scripts" / "presenter_asset_factory.py"
 PRESENTER_GENERATOR = ROOT / "scripts" / "local_presenter_generator.py"
 DIAGNOSTICS = ROOT / "scripts" / "presenter_diagnostics.py"
+DISTRIBUTION = ROOT / "scripts" / "distribution_package.py"
 VERIFIED_PRESENTER = ROOT / "assets" / "presenter-verified.png"
 
 
@@ -153,6 +154,7 @@ class Studio(tk.Tk):
         ttk.Button(
             tools, text="CREATE CINEMATIC VIDEO", command=self.render
         ).pack(side="left", padx=5, ipadx=28, ipady=7)
+        ttk.Button(tools, text="BUILD DISTRIBUTION PACKAGE", command=self.create_distribution_package).pack(side="left", padx=5)
         self.status = tk.StringVar(value="Ready — check local setup first.")
         ttk.Label(
             self, textvariable=self.status, wraplength=900, justify="left"
@@ -411,6 +413,47 @@ class Studio(tk.Tk):
             self._run_local(cmd,self._finish_render)
         except ValueError as exc:
             messagebox.showerror("Render blocked",str(exc))
+
+    def create_distribution_package(self):
+        """Build a review-only package for Facebook, Instagram, TikTok, and WordPress."""
+        video = self.vars["output"].get().strip()
+        if not video or not Path(video).is_file() or Path(video).stat().st_size == 0:
+            messagebox.showerror("Distribution gate", "Create a non-empty cinematic video first.")
+            return
+        title = simpledialog.askstring("Distribution title", "Enter the post/video title:", parent=self)
+        if not title:
+            return
+        description = simpledialog.askstring("Distribution description", "Enter the description/caption:", parent=self)
+        if description is None:
+            return
+        output = filedialog.asksaveasfilename(
+            title="Save review package as a new file",
+            defaultextension=".json",
+            initialfile="distribution-review-v2.json",
+            filetypes=[("JSON", "*.json"), ("All files", "*.*")],
+        )
+        if not output:
+            return
+        if Path(output).exists():
+            messagebox.showerror("Safety gate", "That package already exists. Choose a new filename.")
+            return
+        cmd = [sys.executable, str(DISTRIBUTION), "--video", video, "--title", title, "--description", description,
+               "--output", output, "--platform", "facebook", "--platform", "instagram",
+               "--platform", "tiktok", "--platform", "wordpress"]
+        self.status.set("Building review-only social and WordPress distribution package…")
+        try:
+            self._run_local(cmd, self._finish_distribution)
+        except ValueError as exc:
+            messagebox.showerror("Distribution blocked", str(exc))
+
+    def _finish_distribution(self, p):
+        if p.returncode == 0:
+            self.status.set(p.stdout.strip() or "PASS: distribution package created.")
+            messagebox.showinfo("Distribution QA PASS", "Review package created. Publishing remains OFF and human approval is required.")
+        else:
+            detail = (p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Distribution package failed", detail)
 
     def _finish_render(self,p):
         if p.returncode==0:
