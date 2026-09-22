@@ -26,7 +26,7 @@ Wakil and Walida's son.
 Mustafa's younger brother.
 
 Mujtaba has:
-- full authorized Time-Travel access;
+- full authorized Time-Travel access and control;
 - a smartwatch containing the updated Time-Travel code;
 - a private secret code;
 - strong technical curiosity;
@@ -45,6 +45,24 @@ Recurring family character.
 Wakil and Walida's daughter.
 Younger sister of Mustafa and Mujtaba.
 Recurring family character.
+
+## Khadija
+14 in 2027.
+Wakil and Walida's daughter.
+Younger sister of Mustafa and Mujtaba.
+Full authorized Time-Travel access and control.
+Recurring family character.
+
+## Qirat
+10 in 2027.
+Wakil and Walida's daughter.
+Younger sister of Mustafa and Mujtaba.
+Full authorized Time-Travel access and control.
+Recurring family character.
+
+## Family Full-Control Rule
+
+Every member of the family has full authorized access and control of the Time-Travel system. No family member is permanently restricted from selecting years, traveling, returning, operating Time Gates, or using authorized system functions.
 
 ## Family Dynamic
 
