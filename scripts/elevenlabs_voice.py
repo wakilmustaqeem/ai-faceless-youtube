@@ -5,8 +5,6 @@ ElevenLabs is opt-in through ELEVENLABS_API_KEY. No key is stored in the repo.
 If no key is configured, callers can use the existing Edge-TTS adapter instead.
 """
 from __future__ import annotations
-
-import base64
 import json
 import os
 import urllib.error
@@ -20,6 +18,7 @@ DEFAULT_MODEL = os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2")
 
 def synthesize(text: str, output_path: str, voice_id: str = DEFAULT_VOICE,
                model_id: str = DEFAULT_MODEL) -> None:
+    """Generate ElevenLabs audio using an environment-provided API key."""
     key = os.getenv("ELEVENLABS_API_KEY", "").strip()
     if not key:
         raise RuntimeError(
@@ -29,25 +28,16 @@ def synthesize(text: str, output_path: str, voice_id: str = DEFAULT_VOICE,
     text = text.strip()
     if not text:
         raise ValueError("Narration text is empty.")
-
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.exists():
         raise FileExistsError(f"Refusing to overwrite existing audio: {output}")
 
     url = f"{API}/{voice_id}?output_format=mp3_44100_128"
-    payload = json.dumps({
-        "text": text,
-        "model_id": model_id,
-    }).encode("utf-8")
+    payload = json.dumps({"text": text, "model_id": model_id}).encode("utf-8")
     req = urllib.request.Request(
-        url,
-        data=payload,
-        headers={
-            "xi-api-key": key,
-            "Content-Type": "application/json",
-            "Accept": "audio/mpeg",
-        },
+        url, data=payload,
+        headers={"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"},
         method="POST",
     )
     try:
@@ -58,7 +48,6 @@ def synthesize(text: str, output_path: str, voice_id: str = DEFAULT_VOICE,
         raise RuntimeError(f"ElevenLabs HTTP {exc.code}: {detail}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"ElevenLabs network error: {exc}") from exc
-
     if not data:
         raise RuntimeError("ElevenLabs returned an empty audio response.")
     output.write_bytes(data)
