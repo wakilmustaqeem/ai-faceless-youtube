@@ -5,7 +5,7 @@
 The complete family has full authorized control of the Time-Travel system:
 
 - Wakil — FULL
-- Walida — FULL
+- FM — FULL
 - Mustafa — FULL
 - Mujtaba — FULL
 - Khadija — FULL
@@ -38,7 +38,7 @@ Full control is shared by the family, but protagonist status is not.
 
 **Mustafa remains the MAIN HERO.**
 
-Mujtaba, Khadija and Qirat may independently trigger major story events because they possess full access. Wakil and Walida retain complete control and can intervene directly.
+Mujtaba, Khadija and Qirat may independently trigger major story events because they possess full access. Wakil and FM retain complete control and can intervene directly.
 
 ## MUJTABA SPECIAL ACCESS
 
