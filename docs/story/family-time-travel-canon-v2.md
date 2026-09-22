@@ -4,20 +4,30 @@
 
 | Character | Relationship | Age in 2027 | Canon Role |
 |---|---|---:|---|
-| Wakil | Father | Story-flexible | Original mastermind behind the Time-Travel Mobile Application; gifted it to Mustafa |
-| Mustafa | Wakil's son; Mujtaba's elder brother | 18 | Main HERO and primary adventurer |
-| Mujtaba | Wakil's son; Mustafa's younger brother | 13 | Full-access time traveler, smartwatch developer, holder of a secret code |
-| Walida | Mother of Mustafa and Mujtaba | Story-flexible | Family anchor, wise/supportive parent and recurring character |
+| Wakil | Father | 35 | Original mastermind behind the Time-Travel Mobile Application; gifted it to Mustafa |
+| Walida | Mother | 35 | Family anchor, wise/supportive parent and recurring character |
+| Mustafa | Wakil + Walida's son; Mujtaba's elder brother | 18 | Main HERO and primary adventurer |
+| Mujtaba | Wakil + Walida's son; Mustafa's younger brother | 17 | Full-access time traveler, smartwatch developer, holder of a secret code |
 | Younger Sister 1 | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | Story-flexible | Recurring younger-sister character |
 | Younger Sister 2 | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | Story-flexible | Recurring younger-sister character |
 
-Names and exact ages of Walida and the two younger sisters remain open until explicitly named.
+## Age Lock
+
+In 2027:
+- Wakil = 35
+- Walida = 35
+- Mustafa = 18
+- Mujtaba = 17
+
+Mujtaba is exactly **one year younger than Mustafa**.
+
+The two younger sisters remain younger than both brothers; their exact ages remain open until explicitly set.
 
 ## Mujtaba Full-Access Upgrade
 
 Mujtaba is no longer limited-access.
 
-He successfully updates the Time-Travel code inside his smartwatch and gains **full authorized access** to the Time-Travel system.
+At age 17, he successfully updates the Time-Travel code inside his smartwatch and gains **full authorized access** to the Time-Travel system.
 
 His smartwatch becomes a legitimate personal control device:
 - select destination year;
@@ -43,9 +53,10 @@ Story rule:
 
 ## Hero Hierarchy
 
-**Wakil = original mastermind + father + giver**  
-**Mustafa = MAIN HERO + elder brother**  
-**Mujtaba = full-access younger brother + smartwatch coder + secret-code holder**
+**Wakil = 35 + original mastermind + father + giver**  
+**Walida = 35 + mother + family anchor**  
+**Mustafa = 18 + MAIN HERO + elder brother**  
+**Mujtaba = 17 + full-access younger brother + smartwatch coder + secret-code holder**
 
 Full access does NOT make Mujtaba the main hero.
 
