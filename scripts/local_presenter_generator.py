@@ -13,6 +13,7 @@ from pathlib import Path
 
 
 def generate(prompt: str, output: Path, model_path: Path) -> None:
+    """Generate a presenter image from an already-installed local diffusion model."""
     if output.exists():
         raise FileExistsError(f"Refusing to overwrite existing presenter: {output}")
     if not model_path.exists():
@@ -32,20 +33,12 @@ def generate(prompt: str, output: Path, model_path: Path) -> None:
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.float16 if device == "cuda" else torch.float32
-
     pipe = DiffusionPipeline.from_pretrained(
-        str(model_path),
-        torch_dtype=dtype,
-        local_files_only=True,
-    )
-    pipe = pipe.to(device)
-
+        str(model_path), torch_dtype=dtype, local_files_only=True
+    ).to(device)
     image = pipe(
-        prompt=prompt,
-        height=1536,
-        width=1024,
-        num_inference_steps=30,
-        guidance_scale=6.5,
+        prompt=prompt, height=1536, width=1024,
+        num_inference_steps=30, guidance_scale=6.5,
     ).images[0]
 
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -56,6 +49,7 @@ def generate(prompt: str, output: Path, model_path: Path) -> None:
 
 
 def main() -> None:
+    """Parse CLI arguments and run local presenter generation."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--prompt", default=os.getenv(
         "PRESENTER_PROMPT",
@@ -67,7 +61,6 @@ def main() -> None:
     parser.add_argument("--model", default=os.getenv("PRESENTER_MODEL_PATH", ""))
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
-
     if not args.model:
         raise SystemExit("Set PRESENTER_MODEL_PATH to an already-installed local diffusion model.")
     generate(args.prompt, Path(args.output), Path(args.model))
