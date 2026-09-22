@@ -1,4 +1,4 @@
-# RACING GAME — TIME-TRAVEL UNIVERSE CANON v2.1
+# RACING GAME — TIME-TRAVEL UNIVERSE CANON v2.2
 
 ## Core Story Truth
 
@@ -72,10 +72,47 @@ A traveler selects a **YEAR** in the application and can travel to the correspon
 4. App runs era scan.
 5. App prepares traveler profile and destination-safe wardrobe/props.
 6. Time Gate opens.
-7. Traveler arrives in the selected era.
-8. Return year can be selected unless a story event causes a controlled lock/glitch.
+7. Traveler enters a bright teleportation transition.
+8. Traveler materializes in the selected era.
+9. Return year can be selected unless a story event causes a controlled lock/glitch.
 
-### Destination modes
+### Teleportation visual signature — NEW CANON
+
+Teleportation must have a recognizable visual identity across the entire series.
+
+**Departure:**
+- Traveler and nearby environment receive a sudden, cinematic burst of white/golden light.
+- A short energy pulse/glow surrounds the traveler.
+- The traveler disappears at the peak of the light burst.
+
+**Transition:**
+- The application/Time Gate produces a very brief high-energy light transition.
+- Use controlled particles, glow, subtle distortion and motion blur rather than an oversized fantasy portal.
+- The flash should be powerful but brief so the audience can still read the action.
+- Sound: synchronized energy rise + short whoosh/impact, followed by the destination ambience.
+
+**Arrival:**
+- The same light signature appears at the destination.
+- Light contracts toward the traveler's body.
+- Traveler materializes naturally with correct footing, breathing and environment interaction.
+- The destination environment is already the correct era; no generic modern background is allowed.
+
+**Screen transition:**
+- The Time-Travel App screen must visibly update from the selected year to the destination state.
+- During a completed teleport, the UI may briefly show:
+  **DESTINATION LOCKED**
+  **YEAR: [selected year]**
+  **ERA: [PAST / PRESENT / FUTURE]**
+- Immediately after successful arrival, the screen changes to the destination-era interface/label.
+- When the story intentionally introduces a new world/era, the destination screen may display:
+  **NEW WORLD**
+  followed by the actual year/location once the scene establishes it.
+
+The exact screen wording can vary by story beat, but the **light-burst → screen destination update → materialization** sequence is mandatory for major on-screen teleportations.
+
+This visual signature is a continuity rule, not a one-off effect.
+
+## Destination modes
 
 - PAST
 - PRESENT
