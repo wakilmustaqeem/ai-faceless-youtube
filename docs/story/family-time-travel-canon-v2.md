@@ -7,9 +7,9 @@
 | Wakil | Father | 35 | Original mastermind behind the Time-Travel Mobile Application; gifted it to Mustafa |
 | Walida | Mother | 35 | Family anchor, wise/supportive parent and recurring character |
 | Mustafa | Wakil + Walida's son; Mujtaba's elder brother | 18 | Main HERO and primary adventurer |
-| Mujtaba | Wakil + Walida's son; Mustafa's younger brother | 17 | Full-access time traveler, smartwatch developer, holder of a secret code |
-| Younger Sister 1 | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | Story-flexible | Recurring younger-sister character |
-| Younger Sister 2 | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | Story-flexible | Recurring younger-sister character |
+| Mujtaba | Wakil + Walida's son; Mustafa's younger brother | 13 | Full-access time traveler, smartwatch developer, holder of a secret code |
+| Khadija | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | 14 | Recurring family character |
+| Qirat | Daughter of Wakil and Walida; younger sister of Mustafa/Mujtaba | 10 | Recurring family character |
 
 ## Age Lock
 
@@ -17,17 +17,17 @@ In 2027:
 - Wakil = 35
 - Walida = 35
 - Mustafa = 18
-- Mujtaba = 17
+- Mujtaba = 13
+- Khadija = 14
+- Qirat = 10
 
-Mujtaba is exactly **one year younger than Mustafa**.
-
-The two younger sisters remain younger than both brothers; their exact ages remain open until explicitly set.
+Khadija and Qirat are younger sisters in the family continuity. Their ages are now explicitly locked.
 
 ## Mujtaba Full-Access Upgrade
 
 Mujtaba is no longer limited-access.
 
-At age 17, he successfully updates the Time-Travel code inside his smartwatch and gains **full authorized access** to the Time-Travel system.
+At age 13, he successfully updates the Time-Travel code inside his smartwatch and gains **full authorized access** to the Time-Travel system.
 
 His smartwatch becomes a legitimate personal control device:
 - select destination year;
@@ -56,7 +56,9 @@ Story rule:
 **Wakil = 35 + original mastermind + father + giver**  
 **Walida = 35 + mother + family anchor**  
 **Mustafa = 18 + MAIN HERO + elder brother**  
-**Mujtaba = 17 + full-access younger brother + smartwatch coder + secret-code holder**
+**Mujtaba = 13 + full-access younger brother + smartwatch coder + secret-code holder**  
+**Khadija = 14 + younger sister**  
+**Qirat = 10 + younger sister**
 
 Full access does NOT make Mujtaba the main hero.
 
@@ -84,9 +86,9 @@ She provides:
 
 She can know important family history, but her knowledge should be revealed naturally rather than as exposition.
 
-## Two Younger Sisters
+## Younger Sisters
 
-The two younger sisters are recurring family members.
+Khadija and Qirat are recurring family members.
 
 They can:
 - observe the brothers' missions;
@@ -125,7 +127,7 @@ Never:
 - make Mujtaba's full access equal to protagonist status;
 - forget Mujtaba's smartwatch update;
 - forget Mujtaba's secret code;
-- make the sisters older than the brothers;
+- make Khadija or Qirat older than Mustafa;
 - make Walida unrelated to the family;
 - treat Wakil as merely a side character.
 
