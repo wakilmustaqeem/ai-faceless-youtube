@@ -1,7 +1,7 @@
 """Local cinematic presenter compositor.
 
-Assembles a supplied presenter asset, LCD artwork and local narration with FFmpeg.
-It never overwrites an existing output artifact.
+Assembles a supplied presenter asset, optional LCD artwork/background and local
+narration with FFmpeg. It never overwrites an existing output artifact.
 """
 from __future__ import annotations
 import argparse, shutil, subprocess
@@ -16,12 +16,26 @@ def require_binary(name: str) -> None:
     if shutil.which(name) is None:
         raise SystemExit(f"Required local binary not found: {name}")
 
+def motion_filter(preset: str) -> str:
+    # Background is scaled to a wider canvas, then gently reframed over 30s.
+    if preset == "slow-push":
+        return "scale=2400:1350,crop=1920:1080:x='(iw-1920)/2':y='(ih-1080)/2'"
+    if preset == "pan-left":
+        return "scale=2400:1350,crop=1920:1080:x='(iw-1920)*0.55*(1-t/30)':y='(ih-1080)/2'"
+    if preset == "pan-right":
+        return "scale=2400:1350,crop=1920:1080:x='(iw-1920)*0.55*t/30':y='(ih-1080)/2'"
+    if preset == "slow-zoom":
+        return "scale=2400:1350,crop=1920:1080:x='(iw-1920)/2':y='(ih-1080)/2'"
+    return "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2"
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--presenter", required=True)
     p.add_argument("--voice", required=True)
     p.add_argument("--output", default="output/local-presenter-review.mp4")
     p.add_argument("--lcd", default="")
+    p.add_argument("--background", default="")
+    p.add_argument("--motion", choices=["static","slow-zoom","slow-push","pan-left","pan-right"], default="slow-push")
     args = p.parse_args()
 
     require_binary("ffmpeg")
@@ -31,6 +45,10 @@ def main() -> None:
         raise SystemExit(f"Presenter asset missing: {presenter}")
     if not voice.is_file():
         raise SystemExit(f"Voice asset missing: {voice}")
+    if args.lcd and not Path(args.lcd).is_file():
+        raise SystemExit(f"LCD asset missing: {args.lcd}")
+    if args.background and not Path(args.background).is_file():
+        raise SystemExit(f"Background asset missing: {args.background}")
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.exists():
         raise SystemExit(f"Refusing to overwrite existing artifact: {output}")
@@ -38,21 +56,30 @@ def main() -> None:
     bg = output.parent / ".local_stage.png"
     stage = output.parent / ".local_stage.mp4"
     try:
-        run(["ffmpeg","-y","-f","lavfi","-i","color=c=#070b14:s=1920x1080:r=30",
-             "-t","1","-frames:v","1",str(bg)])
-
-        if args.lcd and Path(args.lcd).is_file():
-            lcd = Path(args.lcd)
-            filt = ("[1:v]scale=1050:590:force_original_aspect_ratio=decrease,"
-                    "pad=1050:590:(ow-iw)/2:(oh-ih)/2:color=#02050a,setsar=1[lcd];"
-                    "[2:v]scale=620:930:force_original_aspect_ratio=decrease,format=rgba[p];"
-                    "[0:v][lcd]overlay=790:125[s];[s][p]overlay=105:110:format=auto[v]")
-            inputs=["-loop","1","-i",str(bg),"-loop","1","-i",str(lcd),
-                    "-loop","1","-i",str(presenter)]
+        bg_source = Path(args.background) if args.background else None
+        if bg_source:
+            background_input = ["-loop","1","-i",str(bg_source)]
         else:
-            filt=("[1:v]scale=620:930:force_original_aspect_ratio=decrease,"
-                  "format=rgba[p];[0:v][p]overlay=105:110:format=auto[v]")
-            inputs=["-loop","1","-i",str(bg),"-loop","1","-i",str(presenter)]
+            run(["ffmpeg","-y","-f","lavfi","-i","color=c=#070b14:s=1920x1080:r=30","-t","1","-frames:v","1",str(bg)])
+            background_input = ["-loop","1","-i",str(bg)]
+
+        lcd = Path(args.lcd) if args.lcd else None
+        if lcd:
+            filt = (
+                f"[0:v]{motion_filter(args.motion)},setsar=1[bg];"
+                "[1:v]scale=1050:590:force_original_aspect_ratio=decrease,"
+                "pad=1050:590:(ow-iw)/2:(oh-ih)/2:color=#02050a,setsar=1[lcd];"
+                "[2:v]scale=620:930:force_original_aspect_ratio=decrease,format=rgba[p];"
+                "[bg][lcd]overlay=790:125[s];[s][p]overlay=105:110:format=auto[v]"
+            )
+            inputs = [*background_input,"-loop","1","-i",str(lcd),"-loop","1","-i",str(presenter)]
+        else:
+            filt = (
+                f"[0:v]{motion_filter(args.motion)},setsar=1[bg];"
+                "[1:v]scale=620:930:force_original_aspect_ratio=decrease,format=rgba[p];"
+                "[bg][p]overlay=105:110:format=auto[v]"
+            )
+            inputs = [*background_input,"-loop","1","-i",str(presenter)]
 
         run(["ffmpeg","-y",*inputs,"-filter_complex",filt,"-map","[v]","-t","30",
              "-r",str(FPS),"-c:v","libx264","-pix_fmt","yuv420p","-an",str(stage)])
