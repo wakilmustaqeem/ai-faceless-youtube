@@ -81,3 +81,12 @@ jobs:
           assert destination.stat().st_size > 0
           print("Presenter image-content QA smoke test passed.")
           PY
+
+      - name: Verify synthetic cinematic FFmpeg render and media QA
+        run: |
+          set -e
+          mkdir -p output/presenter-smoke/render
+          ffmpeg -y -f lavfi -i sine=frequency=440:sample_rate=48000:duration=3             -c:a pcm_s16le output/presenter-smoke/render/voice.wav
+          python scripts/local_presenter_pipeline.py             --presenter output/presenter-smoke/verified.png             --voice output/presenter-smoke/render/voice.wav             --output output/presenter-smoke/render/cinematic-review.mp4             --motion slow-push
+          test -s output/presenter-smoke/render/cinematic-review.mp4
+          echo "Synthetic cinematic render and final media QA passed."
