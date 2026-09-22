@@ -23,6 +23,30 @@ In 2027:
 
 Khadija and Qirat are younger sisters in the family continuity. Their ages are now explicitly locked.
 
+## Family Full-Access + Full-Control Lock
+
+All six family members have **full authorized Time-Travel access and control**:
+- Wakil
+- Walida
+- Mustafa
+- Mujtaba
+- Khadija
+- Qirat
+
+Every family member can, according to the shared system controls:
+- select any destination year;
+- travel to past, present or future;
+- return to any selected year;
+- operate Time Gates;
+- inspect era/time data;
+- control authorized time-travel functions;
+- receive system alerts;
+- use the Time-Travel Mobile Application;
+- use their own authorized control device;
+- respond to glitches and help others.
+
+There is no family member with permanently restricted access. The family trusts one another and shares the system's full control authority.
+
 ## Mujtaba Full-Access Upgrade
 
 Mujtaba is no longer limited-access.
@@ -60,9 +84,9 @@ Story rule:
 **Khadija = 14 + younger sister**  
 **Qirat = 10 + younger sister**
 
-Full access does NOT make Mujtaba the main hero.
+Full access does NOT change the hero hierarchy.
 
-Mustafa remains the central protagonist. Mujtaba becomes a powerful co-adventurer whose actions can trigger major plot turns.
+Mustafa remains the central protagonist. Mujtaba, Khadija and Qirat can all independently initiate major story actions because they have full family control authority. Wakil and Walida also retain complete control and can intervene directly whenever they choose.
 
 ## Glitch Rule
 
@@ -97,7 +121,7 @@ They can:
 - participate in safe, age-appropriate moments;
 - add warmth, humor and emotional stakes.
 
-They do not automatically receive unrestricted Time-Travel access. Their access is determined by story authorization and age-appropriate safety unless a later canon explicitly changes it.
+Khadija and Qirat have the same full family access and control as the rest of the family. Their younger age affects how they are portrayed in scenes, judgment and responsibility, but it does not remove their authorized Time-Travel control.
 
 ## Era Adaptation
 
@@ -124,7 +148,7 @@ Identity and family relationships remain continuous across eras.
 
 Never:
 - remove Mustafa's hero status;
-- make Mujtaba's full access equal to protagonist status;
+- remove full-access/full-control authority from any family member;
 - forget Mujtaba's smartwatch update;
 - forget Mujtaba's secret code;
 - make Khadija or Qirat older than Mustafa;
