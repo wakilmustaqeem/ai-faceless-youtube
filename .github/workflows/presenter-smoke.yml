@@ -1,0 +1,100 @@
+name: Presenter Studio Smoke QA
+
+on:
+  pull_request:
+    branches: [main, feat/local-cinematic-presenter-v1]
+    paths:
+      - "scripts/local_presenter_studio.py"
+      - "scripts/local_presenter_generator.py"
+      - "scripts/local_presenter_pipeline.py"
+      - "scripts/presenter_asset_factory.py"
+      - "scripts/presenter_diagnostics.py"
+      - "scripts/generate_voice.py"
+      - "scripts/elevenlabs_voice.py"
+      - "scripts/local_graphic_studio.py"
+      - "scripts/distribution_package.py"
+      - ".github/workflows/presenter-smoke.yml"
+      - "assets/incoming/presenter/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  presenter-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pillow
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Compile presenter studio scripts
+        run: |
+          python -m py_compile             scripts/local_presenter_studio.py             scripts/local_presenter_generator.py             scripts/local_presenter_pipeline.py             scripts/presenter_asset_factory.py             scripts/presenter_diagnostics.py             scripts/generate_voice.py             scripts/elevenlabs_voice.py             scripts/local_graphic_studio.py             scripts/distribution_package.py
+
+      - name: Verify diagnostics fail safely without local runtime
+        run: |
+          set +e
+          python scripts/presenter_diagnostics.py --model /tmp/definitely-missing-presenter-model > diagnostics.txt 2>&1
+          code=$?
+          set -e
+
+          cat diagnostics.txt
+          test "$code" -eq 2
+          grep -q "STATUS: NOT READY" diagnostics.txt
+          echo "Presenter diagnostics safe-failure test passed."
+
+      - name: Verify image-content QA gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          import subprocess
+          import sys
+
+          root = Path("output/presenter-smoke")
+          root.mkdir(parents=True, exist_ok=True)
+          source = root / "source.png"
+          destination = root / "verified.png"
+
+          image = Image.new("RGB", (900, 1400), "white")
+          draw = ImageDraw.Draw(image)
+          draw.rectangle((250, 180, 650, 1220), fill="black")
+          draw.ellipse((330, 80, 570, 320), fill="gray")
+          image.save(source)
+
+          subprocess.run(
+              [
+                  sys.executable,
+                  "scripts/presenter_asset_factory.py",
+                  "--source",
+                  str(source),
+                  "--destination",
+                  str(destination),
+              ],
+              check=True,
+          )
+
+          assert destination.exists()
+          assert destination.stat().st_size > 0
+          print("Presenter image-content QA smoke test passed.")
+          PY
+
+      - name: Verify synthetic cinematic FFmpeg render and media QA
+        run: |
+          set -e
+          mkdir -p output/presenter-smoke/render
+          ffmpeg -y -f lavfi -i sine=frequency=440:sample_rate=48000:duration=3 -c:a pcm_s16le output/presenter-smoke/render/voice.wav
+          python scripts/local_presenter_pipeline.py --presenter output/presenter-smoke/verified.png --voice output/presenter-smoke/render/voice.wav --output output/presenter-smoke/render/cinematic-review.mp4 --motion slow-push
+          test -s output/presenter-smoke/render/cinematic-review.mp4
+          echo "Synthetic cinematic render and final media QA passed."
