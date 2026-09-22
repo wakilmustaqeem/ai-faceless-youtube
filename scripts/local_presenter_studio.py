@@ -1,96 +1,469 @@
 #!/usr/bin/env python3
-"""Local Cinematic Presenter Studio — offline GUI for graphics, voice inputs and video assembly.
+"""AI & IT Future Tech — Cinematic Presenter Studio v2."""
 
-Requires Python 3 + Tkinter. Rendering uses the existing local FFmpeg pipeline.
-Graphic creation uses the local PIL graphic studio. Nothing is uploaded and
-existing files are never overwritten.
-"""
 from __future__ import annotations
-import subprocess, sys
+
+import os
+import subprocess
+import sys
+import threading
 from pathlib import Path
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, simpledialog, ttk
 
 ROOT = Path(__file__).resolve().parents[1]
 PIPELINE = ROOT / "scripts" / "local_presenter_pipeline.py"
 GRAPHICS = ROOT / "scripts" / "local_graphic_studio.py"
+VOICE_EDGE = ROOT / "scripts" / "generate_voice.py"
+VOICE_ELEVEN = ROOT / "scripts" / "elevenlabs_voice.py"
+PRESENTER_VERIFY = ROOT / "scripts" / "presenter_asset_factory.py"
+PRESENTER_GENERATOR = ROOT / "scripts" / "local_presenter_generator.py"
+DIAGNOSTICS = ROOT / "scripts" / "presenter_diagnostics.py"
+DISTRIBUTION = ROOT / "scripts" / "distribution_package.py"
+VERIFIED_PRESENTER = ROOT / "assets" / "presenter-verified.png"
+
 
 class Studio(tk.Tk):
+    """Provide the local presenter, voice, graphics, and render workflow."""
+
     def __init__(self):
+        """Initialize the studio window and its safe default paths."""
         super().__init__()
-        self.title("AI & IT Future Tech — Cinematic Presenter Studio")
-        self.geometry("800x520")
+        self.title("AI & IT Future Tech — Cinematic Presenter Studio v2")
+        self.geometry("980x940")
         self.resizable(False, False)
-        self.vars = {k: tk.StringVar() for k in ("presenter","voice","lcd","output")}
-        self.vars["output"].set(str(ROOT / "output" / "cinematic-presenter-review.mp4"))
+        self.vars = {
+            k: tk.StringVar()
+            for k in (
+                "presenter",
+                "voice",
+                "lcd",
+                "background",
+                "output",
+                "voice_engine",
+                "eleven_voice_id",
+                "eleven_model",
+                "motion",
+                "model_path",
+                "presenter_output",
+            )
+        }
+        self.vars["output"].set(str(ROOT / "output" / "cinematic-presenter-review-v2.mp4"))
+        self.vars["voice_engine"].set("Edge-TTS")
+        self.vars["eleven_voice_id"].set("JBFqnCBsd6RMkjVDRZzb")
+        self.vars["eleven_model"].set("eleven_multilingual_v2")
+        self.vars["motion"].set("slow-push")
+        self.vars["model_path"].set(os.getenv("PRESENTER_MODEL_PATH", ""))
+        self.vars["presenter_output"].set(str(ROOT / "assets" / "presenter-generated-v2.png"))
         self._build()
 
-    def _row(self, label, key, types, r):
-        ttk.Label(self, text=label).grid(row=r, column=0, sticky="w", padx=14, pady=8)
-        ttk.Entry(self, textvariable=self.vars[key], width=70).grid(row=r, column=1, padx=8)
-        ttk.Button(self, text="Browse", command=lambda: self._pick(key, types)).grid(row=r, column=2, padx=10)
+    def _row(self, label, key, types, row):
+        """Add one labeled path field with a file picker."""
+        ttk.Label(self, text=label).grid(row=row, column=0, sticky="w", padx=14, pady=5)
+        ttk.Entry(self, textvariable=self.vars[key], width=72).grid(row=row, column=1, padx=8)
+        ttk.Button(
+            self, text="Browse", command=lambda: self._pick(key, types)
+        ).grid(row=row, column=2, padx=10)
 
     def _build(self):
-        ttk.Label(self, text="Local Cinematic Presenter Studio", font=("TkDefaultFont", 16, "bold")).grid(
-            row=0, column=0, columnspan=3, pady=(18, 5))
-        ttk.Label(self, text="Offline/free-first • Graphics + presenter + LCD + FFmpeg • Main remains untouched").grid(
-            row=1, column=0, columnspan=3, pady=(0, 10))
-        self._row("Full-body presenter", "presenter", [("Images","*.png *.jpg *.jpeg"),("All files","*.*")], 2)
-        self._row("Natural voice", "voice", [("Audio","*.mp3 *.wav *.m4a *.aac"),("All files","*.*")], 3)
-        self._row("72-inch LCD artwork", "lcd", [("Images","*.png *.jpg *.jpeg"),("All files","*.*")], 4)
-        self._row("New output file", "output", [("MP4","*.mp4"),("All files","*.*")], 5)
-
+        """Build the presenter studio controls and status area."""
+        ttk.Label(
+            self, text="Local Cinematic Presenter Studio v2",
+            font=("TkDefaultFont", 17, "bold")
+        ).grid(row=0, column=0, columnspan=3, pady=(14, 4))
+        ttk.Label(
+            self,
+            text="Presenter Generator + Diagnostics + QA + ElevenLabs/Edge-TTS + Graphics + FFmpeg • Main untouched",
+        ).grid(row=1, column=0, columnspan=3, pady=(0, 9))
+        self._row(
+            "Full-body presenter asset", "presenter",
+            [("Images", "*.png *.jpg *.jpeg"), ("All files", "*.*")], 2
+        )
+        ttk.Label(self, text="Presenter generation prompt").grid(
+            row=3, column=0, sticky="nw", padx=14, pady=5
+        )
+        self.prompt = tk.Text(self, width=72, height=5, wrap="word")
+        self.prompt.grid(row=3, column=1, padx=8, pady=5)
+        self.prompt.insert(
+            "1.0",
+            "photorealistic full-body adult technology presenter, standing naturally, "
+            "professional modern outfit, realistic proportions, natural skin texture, "
+            "friendly confident expression, cinematic studio lighting, feet visible, "
+            "clean professional technology studio, no text, no logo",
+        )
+        self._row(
+            "Local diffusion model path", "model_path",
+            [("All files", "*.*")], 4
+        )
+        self._row(
+            "Generated presenter output", "presenter_output",
+            [("PNG", "*.png"), ("All files", "*.*")], 5
+        )
+        gen = ttk.Frame(self)
+        gen.grid(row=6, column=0, columnspan=3, pady=7)
+        ttk.Button(gen, text="CHECK LOCAL SETUP", command=self.check_setup).pack(side="left", padx=5)
+        ttk.Button(
+            gen, text="GENERATE FULL-BODY PRESENTER", command=self.generate_presenter
+        ).pack(side="left", padx=5)
+        ttk.Button(gen, text="VERIFY PRESENTER", command=self.verify_presenter).pack(side="left", padx=5)
+        ttk.Label(self, text="Narration script").grid(
+            row=7, column=0, sticky="nw", padx=14, pady=5
+        )
+        self.script = tk.Text(self, width=72, height=6, wrap="word")
+        self.script.grid(row=7, column=1, padx=8, pady=5)
+        self.script.insert(
+            "1.0",
+            "Welcome to AI and IT Future Tech. Today we are exploring how AI is changing "
+            "the way we build, learn, and work.",
+        )
+        ttk.Label(self, text="Voice engine").grid(row=8, column=0, sticky="w", padx=14, pady=5)
+        ttk.Combobox(
+            self, textvariable=self.vars["voice_engine"],
+            values=("Edge-TTS", "ElevenLabs"), state="readonly", width=69
+        ).grid(row=8, column=1, padx=8, sticky="w")
+        ttk.Label(self, text="ElevenLabs voice ID").grid(row=9, column=0, sticky="w", padx=14, pady=5)
+        ttk.Entry(self, textvariable=self.vars["eleven_voice_id"], width=72).grid(row=9, column=1, padx=8)
+        ttk.Label(self, text="ElevenLabs model").grid(row=10, column=0, sticky="w", padx=14, pady=5)
+        ttk.Entry(self, textvariable=self.vars["eleven_model"], width=72).grid(row=10, column=1, padx=8)
+        self._row(
+            "Generated natural voice", "voice",
+            [("Audio", "*.mp3 *.wav *.m4a *.aac"), ("All files", "*.*")], 11
+        )
+        self._row(
+            "72-inch LCD artwork", "lcd",
+            [("Images", "*.png *.jpg *.jpeg"), ("All files", "*.*")], 12
+        )
+        self._row(
+            "Cinematic background", "background",
+            [("Images", "*.png *.jpg *.jpeg"), ("All files", "*.*")], 13
+        )
+        self._row(
+            "New output file", "output",
+            [("MP4", "*.mp4"), ("All files", "*.*")], 14
+        )
+        ttk.Label(self, text="Motion").grid(row=15, column=0, sticky="w", padx=14, pady=5)
+        ttk.Combobox(
+            self, textvariable=self.vars["motion"],
+            values=("static", "slow-zoom", "slow-push", "pan-left", "pan-right"),
+            state="readonly", width=69
+        ).grid(row=15, column=1, padx=8, sticky="w")
         tools = ttk.Frame(self)
-        tools.grid(row=6, column=0, columnspan=3, pady=14)
-        ttk.Button(tools, text="OPEN GRAPHIC STUDIO", command=self.open_graphic_studio).pack(side="left", padx=6)
-        ttk.Button(tools, text="CREATE CINEMATIC VIDEO", command=self.render).pack(side="left", padx=6, ipadx=18, ipady=6)
-
-        self.status = tk.StringVar(value="Ready — choose presenter + voice; LCD is optional. Use Graphic Studio for local artwork.")
-        ttk.Label(self, textvariable=self.status, wraplength=740).grid(row=7, column=0, columnspan=3, padx=20, pady=8)
-
-        ttk.Label(self, text="Graphic modes: LCD • room • title • lower-third • thumbnail", foreground="gray").grid(
-            row=8, column=0, columnspan=3, pady=8)
+        tools.grid(row=16, column=0, columnspan=3, pady=10)
+        ttk.Button(tools, text="GENERATE NATURAL VOICE", command=self.generate_voice).pack(side="left", padx=5)
+        ttk.Button(tools, text="OPEN GRAPHIC STUDIO", command=self.open_graphic_studio).pack(side="left", padx=5)
+        ttk.Button(
+            tools, text="CREATE CINEMATIC VIDEO", command=self.render
+        ).pack(side="left", padx=5, ipadx=28, ipady=7)
+        ttk.Button(tools, text="BUILD DISTRIBUTION PACKAGE", command=self.create_distribution_package).pack(side="left", padx=5)
+        self.status = tk.StringVar(value="Ready — check local setup first.")
+        ttk.Label(
+            self, textvariable=self.status, wraplength=900, justify="left"
+        ).grid(row=17, column=0, columnspan=3, padx=20, pady=9)
+        ttk.Label(
+            self, text="No overwrite • no automatic publishing • Main untouched",
+            foreground="gray"
+        ).grid(row=18, column=0, columnspan=3, pady=6)
 
     def _pick(self, key, types):
-        p = filedialog.askopenfilename(filetypes=types)
-        if p:
-            self.vars[key].set(p)
+        """Pick an input asset or a new output destination without overwriting."""
+        output_keys = {"presenter_output", "voice", "output"}
+        if key in output_keys:
+            path = filedialog.asksaveasfilename(
+                title="Choose a new output file",
+                filetypes=types,
+            )
+        else:
+            path = filedialog.askopenfilename(filetypes=types)
+        if path:
+            self.vars[key].set(path)
 
-    def open_graphic_studio(self):
-        if not GRAPHICS.exists():
-            messagebox.showerror("Graphic Studio missing", f"Could not find {GRAPHICS}")
+    def _run_local(self, cmd, on_complete):
+        """Run an allowlisted local Python script off the Tk event thread."""
+        if (
+            not cmd
+            or len(cmd) < 2
+            or Path(cmd[0]).resolve() != Path(sys.executable).resolve()
+            or Path(cmd[1]).resolve().parent != ROOT / "scripts"
+        ):
+            raise ValueError("Refusing to run an unexpected local script.")
+
+        def worker():
+            try:
+                result = subprocess.run(
+                    cmd, cwd=ROOT, capture_output=True, text=True
+                )
+            except Exception as exc:
+                result = subprocess.CompletedProcess(cmd, 1, "", str(exc))
+            self.after(0, lambda: on_complete(result))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def check_setup(self):
+        """Run local dependency and model diagnostics without modifying assets."""
+        model = self.vars["model_path"].get().strip()
+        cmd = [sys.executable, str(DIAGNOSTICS)]
+        if model:
+            cmd += ["--model", model]
+        self.status.set("Running local diagnostics…")
+        try:
+            self._run_local(cmd, self._finish_setup)
+        except ValueError as exc:
+            messagebox.showerror("Diagnostics blocked", str(exc))
+
+    def _finish_setup(self, p):
+        detail = (p.stdout or p.stderr).strip()
+        self.status.set(detail[-1800:] if detail else "Diagnostics returned no output.")
+        if p.returncode == 0:
+            messagebox.showinfo("LOCAL SETUP READY", detail)
+        else:
+            messagebox.showwarning("LOCAL SETUP NOT READY", detail)
+
+
+    def _verify_source(self, source, on_complete):
+        """Verify a presenter off the Tk event thread into the protected destination."""
+        if not source:
+            raise ValueError("Select or generate the full-body presenter first.")
+        if VERIFIED_PRESENTER.exists():
+            raise FileExistsError(
+                f"Verified presenter already exists; refusing to overwrite: {VERIFIED_PRESENTER}"
+            )
+
+        def worker():
+            try:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        str(PRESENTER_VERIFY),
+                        "--source",
+                        source,
+                        "--destination",
+                        str(VERIFIED_PRESENTER),
+                    ],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                )
+            except Exception as exc:
+                result = subprocess.CompletedProcess([], 1, "", str(exc))
+            self.after(0, lambda: on_complete(result, source))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def generate_presenter(self):
+        """Generate a local presenter and verify it before exposing it to rendering."""
+        model = self.vars["model_path"].get().strip()
+        output = self.vars["presenter_output"].get().strip()
+        prompt = self.prompt.get("1.0", "end").strip()
+        if not model:
+            messagebox.showerror(
+                "Local model required",
+                "Select an already-installed local diffusion model. The tool will not download one.",
+            )
             return
-        messagebox.showinfo(
-            "Local Graphic Studio",
-            "Graphic Studio is a CLI tool.\n\n"
-            "Use the terminal in the project root with:\n"
-            "python scripts/local_graphic_studio.py --help\n\n"
-            "It creates LCD, room, title, lower-third and thumbnail assets locally."
-        )
+        if not output or Path(output).exists():
+            messagebox.showerror(
+                "Safety gate",
+                "Choose a new presenter output filename that does not already exist.",
+            )
+            return
+        cmd = [
+            sys.executable,
+            str(PRESENTER_GENERATOR),
+            "--model",
+            model,
+            "--output",
+            output,
+            "--prompt",
+            prompt,
+        ]
+        self.status.set("Generating full-body presenter with the installed local model…")
+        try:
+            self._run_local(cmd, lambda p: self._finish_presenter_generation(p, output))
+        except ValueError as exc:
+            messagebox.showerror("Presenter generation blocked", str(exc))
 
-    def render(self):
-        presenter, voice, lcd, output = [self.vars[k].get().strip() for k in ("presenter","voice","lcd","output")]
-        if not presenter or not voice or not output:
-            messagebox.showerror("Missing input", "Presenter, voice and a new output path are required.")
+    def _finish_presenter_generation(self, p, output):
+        if p.returncode != 0:
+            detail = (p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Presenter generation failed", detail)
+            return
+        try:
+            self._verify_source(output, self._finish_presenter_verification)
+        except (FileExistsError, RuntimeError, ValueError) as exc:
+            self.status.set(str(exc))
+            messagebox.showerror("Presenter verification blocked", str(exc))
+
+    def _finish_presenter_verification(self, p, source):
+        if p.returncode != 0:
+            detail = (p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Presenter verification failed", detail)
+            return
+        self.vars["presenter"].set(str(VERIFIED_PRESENTER))
+        self.status.set("PASS: presenter generated and image-content QA completed.")
+        messagebox.showinfo("Presenter QA PASS", str(VERIFIED_PRESENTER))
+
+    def verify_presenter(self):
+        """Verify a supplied presenter and expose it only after successful QA."""
+        source = self.vars["presenter"].get().strip()
+        try:
+            self._verify_source(source, self._finish_presenter_verification)
+        except (FileExistsError, RuntimeError, ValueError) as exc:
+            self.status.set(str(exc))
+            messagebox.showerror("Presenter verification blocked", str(exc))
+
+    def generate_voice(self):
+        """Generate narration and set the voice field only after successful output QA."""
+        text=self.script.get("1.0","end").strip()
+        output=self.vars["voice"].get().strip() or str(ROOT/"output"/"narration-v2.mp3")
+        if not text:
+            messagebox.showerror("Missing narration","Enter the narration script first.")
             return
         if Path(output).exists():
-            messagebox.showerror("Safety gate", "That output already exists. Choose a new filename.")
+            messagebox.showerror("Safety gate","That audio already exists. Choose a new filename.")
             return
-        cmd = [sys.executable, str(PIPELINE), "--presenter", presenter, "--voice", voice, "--output", output]
-        if lcd:
-            cmd += ["--lcd", lcd]
-        self.status.set("Rendering locally with FFmpeg…")
-        self.update_idletasks()
+        engine=self.vars["voice_engine"].get()
+        if engine=="ElevenLabs":
+            cmd=[sys.executable,str(VOICE_ELEVEN),"--text",text,"--output",output,
+                 "--voice-id",self.vars["eleven_voice_id"].get().strip(),
+                 "--model-id",self.vars["eleven_model"].get().strip()]
+        else:
+            cmd=[sys.executable,str(VOICE_EDGE),"--text",text,"--output",output]
+        self.status.set(f"Generating {engine} narration…")
         try:
-            p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
-            if p.returncode == 0:
-                self.status.set(p.stdout.strip() or "PASS: render complete")
-                messagebox.showinfo("QA PASS", "Cinematic presenter video created successfully.")
-            else:
-                self.status.set((p.stderr or p.stdout).strip()[-1200:])
-                messagebox.showerror("Render failed", self.status.get())
-        except FileNotFoundError:
-            messagebox.showerror("Pipeline missing", f"Could not find {PIPELINE}")
+            self._run_local(cmd,lambda p:self._finish_voice_generation(p,output))
+        except ValueError as exc:
+            messagebox.showerror("Voice generation blocked",str(exc))
+
+    def _finish_voice_generation(self,p,output):
+        if p.returncode==0 and Path(output).exists() and Path(output).stat().st_size>0:
+            self.vars["voice"].set(output)
+            self.status.set(f"PASS: narration created → {output}")
+            messagebox.showinfo("Voice QA PASS",output)
+        else:
+            detail=(p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Voice generation failed",detail)
+
+
+    def open_graphic_studio(self):
+        """Launch a usable local graphic workflow with explicit mode and output controls."""
+        if not GRAPHICS.exists():
+            messagebox.showerror("Graphic Studio missing",f"Could not find {GRAPHICS}")
+            return
+        mode=simpledialog.askstring("Graphic mode","Choose mode: lcd, room, title, lower-third, thumbnail",
+                                    initialvalue="lcd",parent=self)
+        if not mode: return
+        mode=mode.strip().lower()
+        allowed={"lcd","room","title","lower-third","thumbnail"}
+        if mode not in allowed:
+            messagebox.showerror("Invalid graphic mode","Use lcd, room, title, lower-third, or thumbnail.")
+            return
+        output=filedialog.asksaveasfilename(title="Save graphic as a new file",defaultextension=".png",
+                                            filetypes=[("PNG","*.png"),("JPEG","*.jpg *.jpeg"),("All files","*.*")])
+        if not output: return
+        if Path(output).exists():
+            messagebox.showerror("Safety gate","That graphic already exists. Choose a new filename.")
+            return
+        cmd=[sys.executable,str(GRAPHICS),mode,"--output",output]
+        if mode=="thumbnail":
+            source=filedialog.askopenfilename(title="Choose source image for thumbnail",
+                                              filetypes=[("Images","*.png *.jpg *.jpeg"),("All files","*.*")])
+            if not source: return
+            cmd += ["--source",source]
+        self.status.set(f"Creating {mode} graphic locally…")
+        try:
+            self._run_local(cmd,lambda p:self._finish_graphic(p,mode,output))
+        except ValueError as exc:
+            messagebox.showerror("Graphic Studio blocked",str(exc))
+
+    def _finish_graphic(self,p,mode,output):
+        if p.returncode==0:
+            self.status.set(p.stdout.strip() or f"PASS: {mode} graphic created.")
+            messagebox.showinfo("Graphic Studio PASS",output)
+        else:
+            detail=(p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Graphic Studio failed",detail)
+
+
+    def render(self):
+        """Render only from a successfully verified presenter and valid audio asset."""
+        presenter=self.vars["presenter"].get().strip()
+        voice=self.vars["voice"].get().strip()
+        lcd=self.vars["lcd"].get().strip()
+        background=self.vars["background"].get().strip()
+        output=self.vars["output"].get().strip()
+        if presenter != str(VERIFIED_PRESENTER):
+            messagebox.showerror("Presenter QA gate","Render is blocked until the presenter passes image-content QA.")
+            return
+        if not Path(presenter).exists() or not Path(voice).exists() or not output:
+            messagebox.showerror("Missing input","Verified presenter, voice and a new output path are required.")
+            return
+        if Path(output).exists():
+            messagebox.showerror("Safety gate","That output already exists. Choose a new filename.")
+            return
+        cmd=[sys.executable,str(PIPELINE),"--presenter",presenter,"--voice",voice,
+             "--output",output,"--motion",self.vars["motion"].get()]
+        if lcd: cmd += ["--lcd",lcd]
+        if background: cmd += ["--background",background]
+        self.status.set("Rendering locally with FFmpeg and running final media QA…")
+        try:
+            self._run_local(cmd,self._finish_render)
+        except ValueError as exc:
+            messagebox.showerror("Render blocked",str(exc))
+
+    def create_distribution_package(self):
+        """Build a review-only package for Facebook, Instagram, TikTok, and WordPress."""
+        video = self.vars["output"].get().strip()
+        if not video or not Path(video).is_file() or Path(video).stat().st_size == 0:
+            messagebox.showerror("Distribution gate", "Create a non-empty cinematic video first.")
+            return
+        title = simpledialog.askstring("Distribution title", "Enter the post/video title:", parent=self)
+        if not title:
+            return
+        description = simpledialog.askstring("Distribution description", "Enter the description/caption:", parent=self)
+        if description is None:
+            return
+        output = filedialog.asksaveasfilename(
+            title="Save review package as a new file",
+            defaultextension=".json",
+            initialfile="distribution-review-v2.json",
+            filetypes=[("JSON", "*.json"), ("All files", "*.*")],
+        )
+        if not output:
+            return
+        if Path(output).exists():
+            messagebox.showerror("Safety gate", "That package already exists. Choose a new filename.")
+            return
+        cmd = [sys.executable, str(DISTRIBUTION), "--video", video, "--title", title, "--description", description,
+               "--output", output, "--platform", "facebook", "--platform", "instagram",
+               "--platform", "tiktok", "--platform", "wordpress"]
+        self.status.set("Building review-only social and WordPress distribution package…")
+        try:
+            self._run_local(cmd, self._finish_distribution)
+        except ValueError as exc:
+            messagebox.showerror("Distribution blocked", str(exc))
+
+    def _finish_distribution(self, p):
+        if p.returncode == 0:
+            self.status.set(p.stdout.strip() or "PASS: distribution package created.")
+            messagebox.showinfo("Distribution QA PASS", "Review package created. Publishing remains OFF and human approval is required.")
+        else:
+            detail = (p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Distribution package failed", detail)
+
+    def _finish_render(self,p):
+        if p.returncode==0:
+            self.status.set(p.stdout.strip() or "PASS: render complete")
+            messagebox.showinfo("QA PASS","Cinematic presenter video created successfully.")
+        else:
+            detail=(p.stderr or p.stdout).strip()[-1600:]
+            self.status.set(detail)
+            messagebox.showerror("Render failed",detail)
+
 
 if __name__ == "__main__":
     Studio().mainloop()
