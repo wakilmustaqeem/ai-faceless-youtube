@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import threading
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
@@ -167,13 +168,26 @@ class Studio(tk.Tk):
         if path:
             self.vars[key].set(path)
 
-    def _run_local(self, cmd):
-        """Run a fixed local Python script with argument-list execution only."""
-        if not cmd or Path(cmd[1]).resolve().parent != ROOT / "scripts":
+    def _run_local(self, cmd, on_complete):
+        """Run an allowlisted local Python script off the Tk event thread."""
+        if (
+            not cmd
+            or len(cmd) < 2
+            or Path(cmd[0]).resolve() != Path(sys.executable).resolve()
+            or Path(cmd[1]).resolve().parent != ROOT / "scripts"
+        ):
             raise ValueError("Refusing to run an unexpected local script.")
-        return subprocess.run(  # noqa: S603 - shell=False and script path is allowlisted above
-            cmd, cwd=ROOT, capture_output=True, text=True
-        )
+
+        def worker():
+            try:
+                result = subprocess.run(
+                    cmd, cwd=ROOT, capture_output=True, text=True
+                )
+            except Exception as exc:
+                result = subprocess.CompletedProcess(cmd, 1, "", str(exc))
+            self.after(0, lambda: on_complete(result))
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def check_setup(self):
         """Run local dependency and model diagnostics without modifying assets."""
@@ -181,13 +195,20 @@ class Studio(tk.Tk):
         cmd = [sys.executable, str(DIAGNOSTICS)]
         if model:
             cmd += ["--model", model]
-        p = self._run_local(cmd)
+        self.status.set("Running local diagnostics…")
+        try:
+            self._run_local(cmd, self._finish_setup)
+        except ValueError as exc:
+            messagebox.showerror("Diagnostics blocked", str(exc))
+
+    def _finish_setup(self, p):
         detail = (p.stdout or p.stderr).strip()
         self.status.set(detail[-1800:] if detail else "Diagnostics returned no output.")
         if p.returncode == 0:
             messagebox.showinfo("LOCAL SETUP READY", detail)
         else:
             messagebox.showwarning("LOCAL SETUP NOT READY", detail)
+
 
     def _verify_source(self, source):
         """Verify a presenter source into the protected canonical destination."""
@@ -212,37 +233,34 @@ class Studio(tk.Tk):
         output = self.vars["presenter_output"].get().strip()
         prompt = self.prompt.get("1.0", "end").strip()
         if not model:
-            messagebox.showerror(
-                "Local model required",
-                "Select an already-installed local diffusion model. The tool will not download one.",
-            )
+            messagebox.showerror("Local model required", "Select an already-installed local diffusion model. The tool will not download one.")
             return
         if not output or Path(output).exists():
-            messagebox.showerror(
-                "Safety gate", "Choose a new presenter output filename that does not already exist."
-            )
+            messagebox.showerror("Safety gate", "Choose a new presenter output filename that does not already exist.")
             return
-        cmd = [
-            sys.executable, str(PRESENTER_GENERATOR),
-            "--model", model, "--output", output, "--prompt", prompt,
-        ]
+        cmd=[sys.executable,str(PRESENTER_GENERATOR),"--model",model,"--output",output,"--prompt",prompt]
         self.status.set("Generating full-body presenter with the installed local model…")
-        self.update_idletasks()
-        p = self._run_local(cmd)
+        try:
+            self._run_local(cmd, lambda p: self._finish_presenter_generation(p, output))
+        except ValueError as exc:
+            messagebox.showerror("Presenter generation blocked", str(exc))
+
+    def _finish_presenter_generation(self, p, output):
         if p.returncode != 0:
-            detail = (p.stderr or p.stdout).strip()[-1600:]
+            detail=(p.stderr or p.stdout).strip()[-1600:]
             self.status.set(detail)
             messagebox.showerror("Presenter generation failed", detail)
             return
         try:
-            verified = self._verify_source(output)
-        except (FileExistsError, RuntimeError, ValueError) as exc:
+            verified=self._verify_source(output)
+        except (FileExistsError,RuntimeError,ValueError) as exc:
             self.status.set(str(exc))
             messagebox.showerror("Presenter verification failed", str(exc))
             return
         self.vars["presenter"].set(verified)
         self.status.set("PASS: presenter generated and image-content QA completed.")
         messagebox.showinfo("Presenter QA PASS", verified)
+
 
     def verify_presenter(self):
         """Verify a supplied presenter and expose it only after successful QA."""
@@ -259,129 +277,113 @@ class Studio(tk.Tk):
 
     def generate_voice(self):
         """Generate narration and set the voice field only after successful output QA."""
-        text = self.script.get("1.0", "end").strip()
-        output = self.vars["voice"].get().strip() or str(ROOT / "output" / "narration-v2.mp3")
+        text=self.script.get("1.0","end").strip()
+        output=self.vars["voice"].get().strip() or str(ROOT/"output"/"narration-v2.mp3")
         if not text:
-            messagebox.showerror("Missing narration", "Enter the narration script first.")
+            messagebox.showerror("Missing narration","Enter the narration script first.")
             return
         if Path(output).exists():
-            messagebox.showerror("Safety gate", "That audio already exists. Choose a new filename.")
+            messagebox.showerror("Safety gate","That audio already exists. Choose a new filename.")
             return
-        engine = self.vars["voice_engine"].get()
-        if engine == "ElevenLabs":
-            cmd = [
-                sys.executable, str(VOICE_ELEVEN),
-                "--text", text, "--output", output,
-                "--voice-id", self.vars["eleven_voice_id"].get().strip(),
-                "--model-id", self.vars["eleven_model"].get().strip(),
-            ]
+        engine=self.vars["voice_engine"].get()
+        if engine=="ElevenLabs":
+            cmd=[sys.executable,str(VOICE_ELEVEN),"--text",text,"--output",output,
+                 "--voice-id",self.vars["eleven_voice_id"].get().strip(),
+                 "--model-id",self.vars["eleven_model"].get().strip()]
         else:
-            cmd = [sys.executable, str(VOICE_EDGE), "--text", text, "--output", output]
+            cmd=[sys.executable,str(VOICE_EDGE),"--text",text,"--output",output]
         self.status.set(f"Generating {engine} narration…")
-        self.update_idletasks()
-        p = self._run_local(cmd)
-        if p.returncode == 0 and Path(output).exists() and Path(output).stat().st_size > 0:
+        try:
+            self._run_local(cmd,lambda p:self._finish_voice_generation(p,output))
+        except ValueError as exc:
+            messagebox.showerror("Voice generation blocked",str(exc))
+
+    def _finish_voice_generation(self,p,output):
+        if p.returncode==0 and Path(output).exists() and Path(output).stat().st_size>0:
             self.vars["voice"].set(output)
             self.status.set(f"PASS: narration created → {output}")
-            messagebox.showinfo("Voice QA PASS", output)
+            messagebox.showinfo("Voice QA PASS",output)
         else:
-            detail = (p.stderr or p.stdout).strip()[-1600:]
+            detail=(p.stderr or p.stdout).strip()[-1600:]
             self.status.set(detail)
-            messagebox.showerror("Voice generation failed", detail)
+            messagebox.showerror("Voice generation failed",detail)
+
 
     def open_graphic_studio(self):
         """Launch a usable local graphic workflow with explicit mode and output controls."""
         if not GRAPHICS.exists():
-            messagebox.showerror("Graphic Studio missing", f"Could not find {GRAPHICS}")
+            messagebox.showerror("Graphic Studio missing",f"Could not find {GRAPHICS}")
             return
-        mode = simpledialog.askstring(
-            "Graphic mode",
-            "Choose mode: lcd, room, title, lower-third, thumbnail",
-            initialvalue="lcd",
-            parent=self,
-        )
-        if not mode:
-            return
-        mode = mode.strip().lower()
-        allowed = {"lcd", "room", "title", "lower-third", "thumbnail"}
+        mode=simpledialog.askstring("Graphic mode","Choose mode: lcd, room, title, lower-third, thumbnail",
+                                    initialvalue="lcd",parent=self)
+        if not mode: return
+        mode=mode.strip().lower()
+        allowed={"lcd","room","title","lower-third","thumbnail"}
         if mode not in allowed:
-            messagebox.showerror("Invalid graphic mode", "Use lcd, room, title, lower-third, or thumbnail.")
+            messagebox.showerror("Invalid graphic mode","Use lcd, room, title, lower-third, or thumbnail.")
             return
-        output = filedialog.asksaveasfilename(
-            title="Save graphic as a new file",
-            defaultextension=".png",
-            filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg *.jpeg"), ("All files", "*.*")],
-        )
-        if not output:
-            return
+        output=filedialog.asksaveasfilename(title="Save graphic as a new file",defaultextension=".png",
+                                            filetypes=[("PNG","*.png"),("JPEG","*.jpg *.jpeg"),("All files","*.*")])
+        if not output: return
         if Path(output).exists():
-            messagebox.showerror("Safety gate", "That graphic already exists. Choose a new filename.")
+            messagebox.showerror("Safety gate","That graphic already exists. Choose a new filename.")
             return
-        cmd = [sys.executable, str(GRAPHICS), mode, "--output", output]
-        if mode == "thumbnail":
-            source = filedialog.askopenfilename(
-                title="Choose source image for thumbnail",
-                filetypes=[("Images", "*.png *.jpg *.jpeg"), ("All files", "*.*")],
-            )
-            if not source:
-                return
-            cmd += ["--source", source]
+        cmd=[sys.executable,str(GRAPHICS),mode,"--output",output]
+        if mode=="thumbnail":
+            source=filedialog.askopenfilename(title="Choose source image for thumbnail",
+                                              filetypes=[("Images","*.png *.jpg *.jpeg"),("All files","*.*")])
+            if not source: return
+            cmd += ["--source",source]
         self.status.set(f"Creating {mode} graphic locally…")
-        self.update_idletasks()
         try:
-            p = self._run_local(cmd)
+            self._run_local(cmd,lambda p:self._finish_graphic(p,mode,output))
         except ValueError as exc:
-            messagebox.showerror("Graphic Studio blocked", str(exc))
-            return
-        if p.returncode == 0:
+            messagebox.showerror("Graphic Studio blocked",str(exc))
+
+    def _finish_graphic(self,p,mode,output):
+        if p.returncode==0:
             self.status.set(p.stdout.strip() or f"PASS: {mode} graphic created.")
-            messagebox.showinfo("Graphic Studio PASS", output)
+            messagebox.showinfo("Graphic Studio PASS",output)
         else:
-            detail = (p.stderr or p.stdout).strip()[-1600:]
+            detail=(p.stderr or p.stdout).strip()[-1600:]
             self.status.set(detail)
-            messagebox.showerror("Graphic Studio failed", detail)
+            messagebox.showerror("Graphic Studio failed",detail)
+
 
     def render(self):
         """Render only from a successfully verified presenter and valid audio asset."""
-        presenter = self.vars["presenter"].get().strip()
-        voice = self.vars["voice"].get().strip()
-        lcd = self.vars["lcd"].get().strip()
-        background = self.vars["background"].get().strip()
-        output = self.vars["output"].get().strip()
+        presenter=self.vars["presenter"].get().strip()
+        voice=self.vars["voice"].get().strip()
+        lcd=self.vars["lcd"].get().strip()
+        background=self.vars["background"].get().strip()
+        output=self.vars["output"].get().strip()
         if presenter != str(VERIFIED_PRESENTER):
-            messagebox.showerror(
-                "Presenter QA gate",
-                "Render is blocked until the presenter passes image-content QA.",
-            )
+            messagebox.showerror("Presenter QA gate","Render is blocked until the presenter passes image-content QA.")
             return
         if not Path(presenter).exists() or not Path(voice).exists() or not output:
-            messagebox.showerror(
-                "Missing input",
-                "Verified presenter, voice and a new output path are required.",
-            )
+            messagebox.showerror("Missing input","Verified presenter, voice and a new output path are required.")
             return
         if Path(output).exists():
-            messagebox.showerror("Safety gate", "That output already exists. Choose a new filename.")
+            messagebox.showerror("Safety gate","That output already exists. Choose a new filename.")
             return
-        cmd = [
-            sys.executable, str(PIPELINE),
-            "--presenter", presenter, "--voice", voice,
-            "--output", output, "--motion", self.vars["motion"].get(),
-        ]
-        if lcd:
-            cmd += ["--lcd", lcd]
-        if background:
-            cmd += ["--background", background]
+        cmd=[sys.executable,str(PIPELINE),"--presenter",presenter,"--voice",voice,
+             "--output",output,"--motion",self.vars["motion"].get()]
+        if lcd: cmd += ["--lcd",lcd]
+        if background: cmd += ["--background",background]
         self.status.set("Rendering locally with FFmpeg and running final media QA…")
-        self.update_idletasks()
-        p = self._run_local(cmd)
-        if p.returncode == 0:
+        try:
+            self._run_local(cmd,self._finish_render)
+        except ValueError as exc:
+            messagebox.showerror("Render blocked",str(exc))
+
+    def _finish_render(self,p):
+        if p.returncode==0:
             self.status.set(p.stdout.strip() or "PASS: render complete")
-            messagebox.showinfo("QA PASS", "Cinematic presenter video created successfully.")
+            messagebox.showinfo("QA PASS","Cinematic presenter video created successfully.")
         else:
-            detail = (p.stderr or p.stdout).strip()[-1600:]
+            detail=(p.stderr or p.stdout).strip()[-1600:]
             self.status.set(detail)
-            messagebox.showerror("Render failed", detail)
+            messagebox.showerror("Render failed",detail)
 
 
 if __name__ == "__main__":
