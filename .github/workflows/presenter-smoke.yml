@@ -30,6 +30,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install pillow
 
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
       - name: Compile presenter studio scripts
         run: |
           python -m py_compile             scripts/local_presenter_studio.py             scripts/local_presenter_generator.py             scripts/local_presenter_pipeline.py             scripts/presenter_asset_factory.py             scripts/presenter_diagnostics.py             scripts/generate_voice.py             scripts/elevenlabs_voice.py             scripts/local_graphic_studio.py             scripts/distribution_package.py
@@ -86,7 +93,7 @@ jobs:
         run: |
           set -e
           mkdir -p output/presenter-smoke/render
-          ffmpeg -y -f lavfi -i sine=frequency=440:sample_rate=48000:duration=3             -c:a pcm_s16le output/presenter-smoke/render/voice.wav
-          python scripts/local_presenter_pipeline.py             --presenter output/presenter-smoke/verified.png             --voice output/presenter-smoke/render/voice.wav             --output output/presenter-smoke/render/cinematic-review.mp4             --motion slow-push
+          ffmpeg -y -f lavfi -i sine=frequency=440:sample_rate=48000:duration=3 -c:a pcm_s16le output/presenter-smoke/render/voice.wav
+          python scripts/local_presenter_pipeline.py --presenter output/presenter-smoke/verified.png --voice output/presenter-smoke/render/voice.wav --output output/presenter-smoke/render/cinematic-review.mp4 --motion slow-push
           test -s output/presenter-smoke/render/cinematic-review.mp4
           echo "Synthetic cinematic render and final media QA passed."
