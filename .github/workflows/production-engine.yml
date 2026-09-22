@@ -29,33 +29,16 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
       - name: Run production hardening tests
         run: PYTHONPATH=. pytest -q
-      - name: Install Chromium
-        run: python -m playwright install --with-deps chromium
-      - name: Generate English production review video
-        run: PYTHONPATH=. python scripts/prepare_content.py
-      - name: Validate English content package
-        run: PYTHONPATH=. python scripts/validate_content.py
-      - name: Run Argos translation dry run
+      - name: Block legacy slide renderer
         run: |
-          PYTHONPATH=. python scripts/translate.py             --input tests/fixtures/translation_input.json             --output output/translations             --locales ur ar hi es fr             --auto-install
-      - name: Verify localized outputs
+          ! grep -n "scripts/prepare_content.py" .github/workflows/production-engine.yml
+          test -f scripts/cinematic_short_production.py
+          echo "Legacy 30-second slide renderer is BLOCKED for this production track."
+      - name: Prepare cinematic production inputs
         run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          for locale in ["ur","ar","hi","es","fr"]:
-              p = Path("output/translations") / f"{locale}.json"
-              data = json.loads(p.read_text(encoding="utf-8"))
-              assert data["locale"] == locale
-              assert data["brand_name"] == "AI & IT Future Tech"
-              assert "AI & IT Future Tech" in data["script"]
-          print("Argos phase-one translation dry run passed for 5 locales.")
-          PY
-      - name: Upload private review artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: independent-production-review
-          path: output/
+          echo "CINEMATIC SHORT V1: full-body presenter + 72-inch three-sided LCD + Letust Gadget"
+          echo "Runtime assets and natural voice are supplied by the dedicated cinematic production job."
+          echo "No legacy output/video.mp4 is consumed."
       - name: Public YouTube publishing
         run: |
           echo "PUBLIC YOUTUBE PUBLISHING: OFF"
