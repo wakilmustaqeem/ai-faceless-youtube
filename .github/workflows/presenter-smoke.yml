@@ -1,0 +1,56 @@
+name: Presenter Studio Smoke QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/local_presenter_studio.py"
+      - "scripts/local_presenter_generator.py"
+      - "scripts/presenter_asset_factory.py"
+      - "scripts/presenter_diagnostics.py"
+      - ".github/workflows/presenter-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  presenter-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pillow
+      - name: Compile presenter scripts
+        run: |
+          python -m py_compile             scripts/local_presenter_studio.py             scripts/local_presenter_generator.py             scripts/presenter_asset_factory.py             scripts/presenter_diagnostics.py
+      - name: Verify image-content QA gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          root = Path("output/presenter-smoke")
+          root.mkdir(parents=True, exist_ok=True)
+          source = root / "source.png"
+          destination = root / "verified.png"
+
+          image = Image.new("RGB", (900, 1400), "white")
+          draw = ImageDraw.Draw(image)
+          draw.rectangle((250, 180, 650, 1220), fill="black")
+          draw.ellipse((330, 80, 570, 320), fill="gray")
+          image.save(source)
+
+          import subprocess, sys
+          subprocess.run([
+              sys.executable,
+              "scripts/presenter_asset_factory.py",
+              "--source", str(source),
+              "--destination", str(destination),
+          ], check=True)
+
+          assert destination.exists()
+          assert destination.stat().st_size > 0
+          print("Presenter image-content QA smoke test passed.")
+          PY
