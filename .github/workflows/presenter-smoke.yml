@@ -2,7 +2,7 @@ name: Presenter Studio Smoke QA
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feat/local-cinematic-presenter-v1]
     paths:
       - "scripts/local_presenter_studio.py"
       - "scripts/local_presenter_generator.py"
@@ -31,6 +31,8 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           from PIL import Image, ImageDraw
+          import subprocess, sys
+
           root = Path("output/presenter-smoke")
           root.mkdir(parents=True, exist_ok=True)
           source = root / "source.png"
@@ -42,7 +44,6 @@ jobs:
           draw.ellipse((330, 80, 570, 320), fill="gray")
           image.save(source)
 
-          import subprocess, sys
           subprocess.run([
               sys.executable,
               "scripts/presenter_asset_factory.py",
