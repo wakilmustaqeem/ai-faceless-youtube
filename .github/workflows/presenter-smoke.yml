@@ -6,8 +6,13 @@ on:
     paths:
       - "scripts/local_presenter_studio.py"
       - "scripts/local_presenter_generator.py"
+      - "scripts/local_presenter_pipeline.py"
       - "scripts/presenter_asset_factory.py"
       - "scripts/presenter_diagnostics.py"
+      - "scripts/generate_voice.py"
+      - "scripts/elevenlabs_voice.py"
+      - "scripts/local_graphic_studio.py"
+      - "scripts/distribution_package.py"
       - ".github/workflows/presenter-smoke.yml"
   workflow_dispatch:
 
@@ -19,19 +24,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pillow
-      - name: Compile presenter scripts
+
+      - name: Compile presenter studio scripts
         run: |
-          python -m py_compile             scripts/local_presenter_studio.py             scripts/local_presenter_generator.py             scripts/presenter_asset_factory.py             scripts/presenter_diagnostics.py
+          python -m py_compile             scripts/local_presenter_studio.py             scripts/local_presenter_generator.py             scripts/local_presenter_pipeline.py             scripts/presenter_asset_factory.py             scripts/presenter_diagnostics.py             scripts/generate_voice.py             scripts/elevenlabs_voice.py             scripts/local_graphic_studio.py             scripts/distribution_package.py
+
+      - name: Verify diagnostics fail safely without local runtime
+        run: |
+          set +e
+          python scripts/presenter_diagnostics.py --model /tmp/definitely-missing-presenter-model > diagnostics.txt 2>&1
+          code=$?
+          set -e
+
+          cat diagnostics.txt
+          test "$code" -eq 2
+          grep -q "STATUS: NOT READY" diagnostics.txt
+          echo "Presenter diagnostics safe-failure test passed."
+
       - name: Verify image-content QA gate
         run: |
           python - <<'PY'
           from pathlib import Path
           from PIL import Image, ImageDraw
-          import subprocess, sys
+          import subprocess
+          import sys
 
           root = Path("output/presenter-smoke")
           root.mkdir(parents=True, exist_ok=True)
@@ -44,12 +65,17 @@ jobs:
           draw.ellipse((330, 80, 570, 320), fill="gray")
           image.save(source)
 
-          subprocess.run([
-              sys.executable,
-              "scripts/presenter_asset_factory.py",
-              "--source", str(source),
-              "--destination", str(destination),
-          ], check=True)
+          subprocess.run(
+              [
+                  sys.executable,
+                  "scripts/presenter_asset_factory.py",
+                  "--source",
+                  str(source),
+                  "--destination",
+                  str(destination),
+              ],
+              check=True,
+          )
 
           assert destination.exists()
           assert destination.stat().st_size > 0
