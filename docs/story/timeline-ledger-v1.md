@@ -2,12 +2,12 @@
 
 | Year | Event | Access | Transfer |
 |---|---|---|---|
-| 2027 | Mustafa, age 18, Matric student, creates Racing Game APK | ROOT | Original APK + hidden Secret Core |
-| 2040 | Future classroom updates authorized game modules | LIMITED | Knowledge/talent exchange |
-| 2040 | Time Bridge first activates | LIMITED | Controlled Past connection |
-| 2090 | Evolved generation contacts 2040 | EVOLVED/LIMITED | Messages + approved data |
-| 2027↔2040 | Time Commerce begins | MUSTAFA-controlled | Future tech ↔ past talent/products |
-| 2040↔2090 | Later-generation exchange expands | LIMITED | Authorized modules only |
+| 2027 | Wakil gifts the Time-Travel App to Mustafa, age 18, Matric student | FAMILY FULL | Original app + hidden Secret Core architecture |
+| 2040 | Future classroom updates authorized game modules | SESSION-LIMITED | Knowledge/talent exchange |
+| 2040 | Time Bridge first activates | SESSION-LIMITED / FAMILY FULL | Controlled Past connection |
+| 2090 | Evolved generation contacts 2040 | EVOLVED / FAMILY FULL | Messages + approved data |
+| 2027↔2040 | Time Commerce begins | FAMILY FULL / MUSTAFA-LED | Future tech ↔ past talent/products |
+| 2040↔2090 | Later-generation exchange expands | FAMILY FULL / OUTSIDER-LIMITED | Authorized modules only |
 
 ## Object Ledger Rule
 Every time-travelled object must have:
