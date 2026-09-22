@@ -14,6 +14,7 @@ on:
       - "scripts/local_graphic_studio.py"
       - "scripts/distribution_package.py"
       - ".github/workflows/presenter-smoke.yml"
+      - "assets/incoming/presenter/**"
   workflow_dispatch:
 
 permissions:
