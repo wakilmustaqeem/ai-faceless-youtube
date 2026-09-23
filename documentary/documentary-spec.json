@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "brand": "AI & IT Future Tech",
+  "tagline": "AI, IT & the Future of Technology",
+  "master_language": "en",
+  "format": "long_form_documentary",
+  "target_minutes": 20,
+  "acceptable_minutes": [
+    15,
+    30
+  ],
+  "structure": [
+    "cold_open",
+    "central_question",
+    "context",
+    "evidence_reveal_1",
+    "evidence_reveal_2",
+    "turning_point",
+    "what_changed",
+    "what_remains_uncertain",
+    "what_happens_next",
+    "closing_question"
+  ],
+  "tone": {
+    "energy": "high",
+    "curiosity": "high",
+    "naturalism": "high",
+    "sensationalism": "none",
+    "claim_style": "source_first"
+  },
+  "voice_policy": {
+    "girl_voice": "en-US-JennyNeural",
+    "boy_voice": "en-US-GuyNeural",
+    "switching": "act_boundaries"
+  },
+  "visual_policy": {
+    "preferred": [
+      "licensed_or_original_visuals",
+      "source_screenshots",
+      "charts",
+      "diagrams",
+      "b_roll"
+    ],
+    "no_unverified_media": true
+  },
+  "gates": {
+    "source_verification": true,
+    "originality_check": true,
+    "voice_qa": true,
+    "caption_qa": true,
+    "visual_qa": true,
+    "human_review": true,
+    "public_publish": false
+  }
+}
