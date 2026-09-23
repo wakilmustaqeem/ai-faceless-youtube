@@ -6,7 +6,9 @@
     "title",
     "hook",
     "acts",
-    "sources"
+    "sources",
+    "ai_disclosure_required",
+    "metadata"
   ],
   "properties": {
     "title": {
@@ -79,6 +81,31 @@
           "published_at": {
             "type": "string"
           }
+        }
+      }
+    },
+    "ai_disclosure_required": {
+      "type": "boolean"
+    },
+    "ai_disclosure_reason": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "title",
+        "description",
+        "thumbnail_concept"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "thumbnail_concept": {
+          "type": "string"
         }
       }
     }
