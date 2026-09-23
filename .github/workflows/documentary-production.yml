@@ -1,0 +1,65 @@
+name: Long-Form Documentary Production
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "documentary/**"
+      - "scripts/prepare_documentary.py"
+      - ".github/workflows/documentary-production.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  documentary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate documentary engine
+        run: |
+          python -m py_compile scripts/prepare_documentary.py
+          python -c 'import json; [json.load(open(p, encoding="utf-8")) for p in ["documentary/documentary-spec.json","documentary/voice-profiles.json"]]; print("Documentary configuration is valid.")'
+      - name: Validate documentary episode when supplied
+        run: python scripts/validate_documentary_episode.py
+      - name: Run YouTube / Google documentary compliance gate
+        if: hashFiles('documentary/episode.json') != ''
+        run: python scripts/check_documentary_compliance.py
+      - name: Build source-verified documentary package when an episode is supplied
+        if: hashFiles('documentary/episode.json') != ''
+        run: |
+          python scripts/validate_documentary_episode.py
+          python scripts/build_documentary_package.py
+      - name: Build documentary review package when an episode is supplied
+        run: |
+          if [ -f documentary/episode.json ]; then
+            PYTHONPATH=. python scripts/prepare_documentary.py
+          else
+            echo "No documentary/episode.json supplied; engine validation only."
+          fi
+      - name: Upload documentary package
+        if: hashFiles('output/documentary/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-form-documentary-review
+          path: output/documentary/
+      - name: Upload compliance manifest
+        if: hashFiles('output/documentary/compliance-manifest.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-compliance-review
+          path: output/documentary/compliance-manifest.json
+      - name: Confirm public publishing remains blocked
+        run: |
+          if [ -f documentary/episode.json ]; then
+            if [ ! -f output/documentary/documentary-manifest.json ]; then
+              echo "Episode supplied but documentary manifest was not produced."
+              exit 1
+            fi
+            python -c 'import json; d=json.load(open("output/documentary/documentary-manifest.json")); assert d["public_youtube_publish_allowed"] is False; assert d["human_review_required"] is True; print("Long-form documentary production is review-gated.")'
+          else
+            echo "No episode supplied; public publishing remains disabled."
+          fi

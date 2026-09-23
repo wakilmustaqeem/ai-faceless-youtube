@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "language": "en",
+  "style": "natural_young_adult",
+  "voices": {
+    "girl": {
+      "provider": "edge-tts",
+      "voice": "en-US-JennyNeural",
+      "role": "warm_explainer",
+      "rate": "-3%",
+      "pitch": "+0Hz"
+    },
+    "boy": {
+      "provider": "edge-tts",
+      "voice": "en-US-GuyNeural",
+      "role": "curious_narrator",
+      "rate": "-4%",
+      "pitch": "+0Hz"
+    }
+  },
+  "rules": [
+    "Use adult-sounding natural voices; do not imitate a real person.",
+    "Alternate voices by documentary act or evidence transition, not every sentence.",
+    "Keep delivery conversational, energetic and clear.",
+    "Never use synthetic excitement to replace missing evidence."
+  ]
+}

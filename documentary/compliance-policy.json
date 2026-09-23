@@ -1,0 +1,15 @@
+{
+  "schema_version":"1.0",
+  "public_publish_allowed":false,
+  "human_review_required":true,
+  "gates":{
+    "originality":"required",
+    "reused_content":"required",
+    "asset_rights":"required",
+    "ai_disclosure":"required",
+    "community_guidelines":"required",
+    "advertiser_suitability":"required",
+    "metadata":"required"
+  },
+  "fail_closed":true
+}
