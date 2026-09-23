@@ -30,6 +30,10 @@ jobs:
           PY
       - name: Validate documentary episode when supplied
         run: python scripts/validate_documentary_episode.py
+      - name: Run YouTube / Google documentary compliance gate
+        if: hashFiles('documentary/episode.json') != ''
+        run: python scripts/check_documentary_compliance.py
+
       - name: Build source-verified documentary package when an episode is supplied
         if: hashFiles('documentary/episode.json') != ''
         run: |
@@ -49,6 +53,12 @@ jobs:
         with:
           name: long-form-documentary-review
           path: output/documentary/
+      - name: Upload compliance manifest
+        if: hashFiles('output/documentary/compliance-manifest.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-compliance-review
+          path: output/documentary/compliance-manifest.json
       - name: Confirm public publishing remains blocked
         run: |
           if [ -f output/documentary/documentary-manifest.json ]; then
