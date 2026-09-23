@@ -1,15 +1,26 @@
 {
-  "schema_version":"1.0",
-  "public_publish_allowed":false,
-  "human_review_required":true,
-  "gates":{
-    "originality":"required",
-    "reused_content":"required",
-    "asset_rights":"required",
-    "ai_disclosure":"required",
-    "community_guidelines":"required",
-    "advertiser_suitability":"required",
-    "metadata":"required"
+  "schema_version": "2.0",
+  "public_publish_allowed": false,
+  "human_review_required": true,
+  "gates": {
+    "originality": "required",
+    "reused_content": "required",
+    "asset_rights": "required",
+    "ai_disclosure": "required",
+    "community_guidelines": "required",
+    "advertiser_suitability": "required",
+    "metadata": "required",
+    "evidence_chain": "required",
+    "multimedia_verification": "required",
+    "synthetic_asset_provenance": "required",
+    "ai_detection": "assistive_only",
+    "human_approval": "required"
   },
-  "fail_closed":true
+  "fail_closed": true,
+  "disclosure": {
+    "real_vs_ai_labeling": true,
+    "provenance": true,
+    "watermarking_considered": true
+  },
+  "locked_rule": "Source establishes fact. Evidence supports claim. AI assists verification. Automation flags problems. Human approval establishes publication authority."
 }
