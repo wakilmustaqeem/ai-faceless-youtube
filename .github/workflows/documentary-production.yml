@@ -25,6 +25,9 @@ jobs:
           python -c 'import json; [json.load(open(p, encoding="utf-8")) for p in ["documentary/documentary-spec.json","documentary/voice-profiles.json"]]; print("Documentary configuration is valid.")'
       - name: Validate documentary episode when supplied
         run: python scripts/validate_documentary_episode.py
+      - name: Run Documentary QA v2 evidence / multimedia / provenance gate
+        if: hashFiles('documentary/episode.json') != ''
+        run: python scripts/check_documentary_qa_v2.py
       - name: Run YouTube / Google documentary compliance gate
         if: hashFiles('documentary/episode.json') != ''
         run: python scripts/check_documentary_compliance.py
