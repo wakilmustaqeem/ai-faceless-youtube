@@ -1,0 +1,37 @@
+name: Long-Form Documentary Production
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "documentary/**"
+      - "scripts/prepare_documentary.py"
+      - ".github/workflows/documentary-production.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  documentary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build documentary review package
+        run: PYTHONPATH=. python scripts/prepare_documentary.py
+      - name: Upload documentary package
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-form-documentary-review
+          path: output/documentary/
+      - name: Confirm public publishing remains blocked
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open("output/documentary/documentary-manifest.json"))
+          assert d["public_youtube_publish_allowed"] is False
+          assert d["human_review_required"] is True
+          print("Long-form documentary production is review-gated.")
+          PY
