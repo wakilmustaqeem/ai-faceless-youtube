@@ -23,3 +23,19 @@ Every factual claim must remain traceable to the research/evidence package. The 
 Research → source verification → documentary script → originality gate → dual-voice narration → visuals → captions → QA → private review → human approval → publish.
 
 Public YouTube publishing remains OFF by default.
+
+## Documentary QA v2
+
+The documentary engine now uses a claim-level evidence chain:
+
+**Claim → Source → Evidence → Script → Voice → Visual → Timestamp**
+
+Important multimedia assets must record origin, authenticity, context, temporal/geographic consistency, manipulation signals, and verification status. Generated or reconstructed assets additionally require explicit provenance: **asset_id, source_type, generation_method, reference, timestamp, verification_status**.
+
+AI/automated detection is assistive only. Detector outputs may flag or recommend investigation; they do not establish authenticity or publication authority. Human review remains the final authority.
+
+AI-generated or reconstructed media must be clearly disclosed where applicable. Provenance and watermarking are treated as authenticity-supporting layers, not substitutes for editorial verification.
+
+Locked rule:
+
+> Source establishes fact. Evidence supports claim. AI assists verification. Automation flags problems. Human approval establishes publication authority.
