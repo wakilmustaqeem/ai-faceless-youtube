@@ -63,5 +63,32 @@
       "url": "https://example.com/source",
       "verification_status": "verified"
     }
-  ]
+  ],
+  "claims": [
+    {
+      "claim_id": "claim-1",
+      "claim": "REPLACE WITH A verified factual claim.",
+      "source_ids": [
+        "source-1"
+      ],
+      "evidence": [
+        "REPLACE WITH the evidence supporting the claim."
+      ],
+      "script_refs": [
+        "act-1"
+      ],
+      "voice_refs": [
+        "act-1"
+      ],
+      "visual_refs": [
+        "asset-1"
+      ],
+      "timestamp_refs": [
+        "00:00:00-00:00:30"
+      ]
+    }
+  ],
+  "ai_disclosure_required": true,
+  "ai_disclosure_reason": "AI voice and/or generated or reconstructed media may be used; label applicable synthetic content clearly.",
+  "human_approval_status": "pending"
 }
