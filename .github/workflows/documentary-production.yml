@@ -28,6 +28,8 @@ jobs:
               json.load(open(p, encoding="utf-8"))
           print("Documentary configuration is valid.")
           PY
+      - name: Validate documentary episode when supplied
+        run: python scripts/validate_documentary_episode.py
       - name: Build documentary review package when an episode is supplied
         run: |
           if [ -f documentary/episode.json ]; then
