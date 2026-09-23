@@ -6,6 +6,8 @@ on:
     paths:
       - "documentary/**"
       - "scripts/prepare_documentary.py"
+      - "scripts/check_documentary_qa_v2.py"
+      - "tests/test_documentary_qa_v2_contract.py"
       - ".github/workflows/documentary-production.yml"
 
 permissions:
