@@ -1,0 +1,15 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Documentary Asset Provenance",
+  "type":"object",
+  "required":["assets"],
+  "properties":{"assets":{"type":"array","items":{"type":"object","required":["asset_id","type","source","rights_status","commercial_use_allowed"],"properties":{
+    "asset_id":{"type":"string"},"type":{"enum":["visual","audio","music","voice"]},
+    "source":{"type":"string","minLength":2},
+    "license":{"type":"string"},
+    "rights_status":{"enum":["original","licensed","public_domain","open_license","permission_required","unknown"]},
+    "commercial_use_allowed":{"type":"boolean"},
+    "attribution_required":{"type":"boolean"},
+    "attribution":{"type":"string"}
+  }}}}
+}
