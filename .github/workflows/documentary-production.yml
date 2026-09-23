@@ -22,12 +22,7 @@ jobs:
       - name: Validate documentary engine
         run: |
           python -m py_compile scripts/prepare_documentary.py
-          python - <<'PY'
-          import json
-          for p in ["documentary/documentary-spec.json", "documentary/voice-profiles.json"]:
-              json.load(open(p, encoding="utf-8"))
-          print("Documentary configuration is valid.")
-          PY
+          python -c 'import json; [json.load(open(p, encoding="utf-8")) for p in ["documentary/documentary-spec.json","documentary/voice-profiles.json"]]; print("Documentary configuration is valid.")'
       - name: Validate documentary episode when supplied
         run: python scripts/validate_documentary_episode.py
       - name: Run YouTube / Google documentary compliance gate
@@ -46,7 +41,7 @@ jobs:
             echo "No documentary/episode.json supplied; engine validation only."
           fi
       - name: Upload documentary package
-        if: ${{ hashFiles('output/documentary/**') != '' }}
+        if: hashFiles('output/documentary/**') != ''
         uses: actions/upload-artifact@v4
         with:
           name: long-form-documentary-review
@@ -64,13 +59,7 @@ jobs:
               echo "Episode supplied but documentary manifest was not produced."
               exit 1
             fi
-            python - <<'PY'
-            import json
-            d=json.load(open("output/documentary/documentary-manifest.json"))
-            assert d["public_youtube_publish_allowed"] is False
-            assert d["human_review_required"] is True
-            print("Long-form documentary production is review-gated.")
-            PY
+            python -c 'import json; d=json.load(open("output/documentary/documentary-manifest.json")); assert d["public_youtube_publish_allowed"] is False; assert d["human_review_required"] is True; print("Long-form documentary production is review-gated.")'
           else
             echo "No episode supplied; public publishing remains disabled."
           fi
