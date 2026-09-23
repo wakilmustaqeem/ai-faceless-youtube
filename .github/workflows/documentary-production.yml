@@ -33,13 +33,11 @@ jobs:
       - name: Run YouTube / Google documentary compliance gate
         if: hashFiles('documentary/episode.json') != ''
         run: python scripts/check_documentary_compliance.py
-
       - name: Build source-verified documentary package when an episode is supplied
         if: hashFiles('documentary/episode.json') != ''
         run: |
           python scripts/validate_documentary_episode.py
           python scripts/build_documentary_package.py
-
       - name: Build documentary review package when an episode is supplied
         run: |
           if [ -f documentary/episode.json ]; then
@@ -61,7 +59,11 @@ jobs:
           path: output/documentary/compliance-manifest.json
       - name: Confirm public publishing remains blocked
         run: |
-          if [ -f output/documentary/documentary-manifest.json ]; then
+          if [ -f documentary/episode.json ]; then
+            if [ ! -f output/documentary/documentary-manifest.json ]; then
+              echo "Episode supplied but documentary manifest was not produced."
+              exit 1
+            fi
             python - <<'PY'
             import json
             d=json.load(open("output/documentary/documentary-manifest.json"))
@@ -70,5 +72,5 @@ jobs:
             print("Long-form documentary production is review-gated.")
             PY
           else
-            echo "No episode package produced; public publishing remains disabled."
+            echo "No episode supplied; public publishing remains disabled."
           fi
