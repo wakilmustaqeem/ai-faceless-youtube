@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verified Long-Form Documentary Episode",
+  "type": "object",
+  "required": [
+    "title",
+    "hook",
+    "acts",
+    "sources",
+    "ai_disclosure_required",
+    "metadata",
+    "claims",
+    "human_approval_status",
+    "ai_disclosure_reason"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 10
+    },
+    "hook": {
+      "type": "string",
+      "minLength": 50
+    },
+    "acts": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "text",
+          "voice",
+          "visual_direction"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 80
+          },
+          "voice": {
+            "enum": [
+              "girl",
+              "boy"
+            ]
+          },
+          "visual_direction": {
+            "type": "string",
+            "minLength": 20
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "url",
+          "verification_status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "verification_status": {
+            "const": "verified"
+          },
+          "published_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ai_disclosure_required": {
+      "type": "boolean"
+    },
+    "ai_disclosure_reason": {
+      "type": "string",
+      "minLength": 3
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "title",
+        "description",
+        "thumbnail_concept"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "thumbnail_concept": {
+          "type": "string"
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_id",
+          "claim",
+          "source_ids",
+          "evidence",
+          "script_refs",
+          "voice_refs",
+          "visual_refs",
+          "timestamp_refs"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string"
+          },
+          "claim": {
+            "type": "string",
+            "minLength": 3
+          },
+          "source_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "script_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "voice_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "visual_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timestamp_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "human_approval_status": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ]
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "title": "REPLACE WITH A VERIFIED DOCUMENTARY TITLE",
+  "hook": "REPLACE WITH A source-supported opening question or discovery.",
+  "acts": [
+    {
+      "name": "Cold Open",
+      "text": "REPLACE WITH SOURCE-SUPPORTED SCRIPT TEXT.",
+      "voice": "girl",
+      "visual_direction": "Original or licensed establishing visuals tied to the verified evidence.",
+      "evidence_refs": [
+        "source-1"
+      ]
+    },
+    {
+      "name": "Central Question",
+      "text": "REPLACE WITH SOURCE-SUPPORTED SCRIPT TEXT.",
+      "voice": "boy",
+      "visual_direction": "Evidence-led title card or diagram.",
+      "evidence_refs": [
+        "source-1"
+      ]
+    },
+    {
+      "name": "Context",
+      "text": "REPLACE WITH SOURCE-SUPPORTED SCRIPT TEXT.",
+      "voice": "girl",
+      "visual_direction": "Timeline, diagram, or licensed source visual.",
+      "evidence_refs": [
+        "source-1"
+      ]
+    },
+    {
+      "name": "Evidence Reveal",
+      "text": "REPLACE WITH SOURCE-SUPPORTED SCRIPT TEXT.",
+      "voice": "boy",
+      "visual_direction": "Source screenshots, charts, or original graphics.",
+      "evidence_refs": [
+        "source-1"
+      ]
+    },
+    {
+      "name": "Turning Point",
+      "text": "REPLACE WITH SOURCE-SUPPORTED SCRIPT TEXT.",
+      "voice": "girl",
+      "visual_direction": "Original explanatory graphic showing the change.",
+      "evidence_refs": [
+        "source-1"
+      ]
+    },
+    {
+      "name": "What Happens Next",
+      "text": "REPLACE WITH SOURCE-SUPPORTED SCRIPT TEXT.",
+      "voice": "boy",
+      "visual_direction": "Forward-looking but clearly separated from established facts.",
+      "evidence_refs": [
+        "source-1"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "name": "VERIFIED SOURCE",
+      "url": "https://example.com/source",
+      "verification_status": "verified"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim-1",
+      "claim": "REPLACE WITH A verified factual claim.",
+      "source_ids": [
+        "source-1"
+      ],
+      "evidence": [
+        "REPLACE WITH the evidence supporting the claim."
+      ],
+      "script_refs": [
+        "act-1"
+      ],
+      "voice_refs": [
+        "act-1"
+      ],
+      "visual_refs": [
+        "asset-1"
+      ],
+      "timestamp_refs": [
+        "00:00:00-00:00:30"
+      ]
+    }
+  ],
+  "ai_disclosure_required": true,
+  "ai_disclosure_reason": "AI voice and/or generated or reconstructed media may be used; label applicable synthetic content clearly.",
+  "human_approval_status": "pending"
+}

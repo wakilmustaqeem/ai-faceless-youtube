@@ -1,0 +1,18 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Documentary Multimedia Verification v2",
+  "type":"object",
+  "required":["assets"],
+  "properties":{"assets":{"type":"array","items":{"type":"object","required":["asset_id","media_type","origin","authenticity","context","temporal_geographic_consistency","manipulation_signals","verification_status","human_approval_required"],"properties":{
+    "asset_id":{"type":"string","minLength":2},
+    "media_type":{"enum":["image","video","audio"]},
+    "origin":{"type":"object","required":["source_type","reference"],"properties":{"source_type":{"enum":["original","licensed","public_domain","open_license","generated","reconstructed","third_party"]},"reference":{"type":"string","minLength":2}}},
+    "authenticity":{"enum":["verified","partially_verified","unknown","not_applicable"]},
+    "context":{"enum":["verified","partially_verified","unknown"]},
+    "temporal_geographic_consistency":{"enum":["verified","partially_verified","unknown","not_applicable"]},
+    "manipulation_signals":{"type":"array","items":{"type":"string"}},
+    "ai_detection":{"type":"object","properties":{"status":{"enum":["not_run","flagged","no_flag_detected","inconclusive"]},"tool":{"type":"string"},"result":{"type":"string"}}},
+    "verification_status":{"enum":["verified","flagged","blocked","needs_human_review"]},
+    "human_approval_required":{"const":true}
+  }}}}
+}

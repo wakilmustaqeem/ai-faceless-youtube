@@ -1,0 +1,12 @@
+{
+  "schema_version":"2.0",
+  "rule":"Source establishes fact. Evidence supports claim. AI assists verification. Automation flags problems. Human approval establishes publication authority.",
+  "evidence_chain":["claim","source","evidence","script","voice","visual","timestamp"],
+  "multimedia_verification":["origin","authenticity","context","temporal_geographic_consistency","manipulation_signals"],
+  "ai_detection":{"authority":"assistive_only","final_authority":"human"},
+  "synthetic_asset_provenance":["asset_id","source_type","generation_method","reference","timestamp","verification_status"],
+  "disclosure":{"real_vs_ai_labeling":true,"provenance":true,"watermarking_considered":true},
+  "public_publish_allowed":false,
+  "human_review_required":true,
+  "fail_closed":true
+}
